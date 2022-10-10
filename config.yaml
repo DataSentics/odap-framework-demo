@@ -1,0 +1,20 @@
+parameters:
+  entities:
+    customer:
+      id_column: "customer_id"
+      id_column_type: "long"
+
+  features:
+    table: 'odap_features.customer'
+    path: 'dbfs:/odap_features/customer.delta'
+
+  segments:
+    customers_who_might_be_interested_in_investments:
+      exports:
+        - azure_blob
+
+  exports:
+    destinations:
+      azure_blob:
+        attributes:
+          - customer_email
