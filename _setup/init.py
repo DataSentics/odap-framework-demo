@@ -6,6 +6,7 @@ import os
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_offline_sdm_l2")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_digi_sdm_l2")
 spark.sql("CREATE DATABASE IF NOT EXISTS odap_features")
+spark.sql("CREATE DATABASE IF NOT EXISTS odap_segments")
 
 # COMMAND ----------
 
