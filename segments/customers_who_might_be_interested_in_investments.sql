@@ -10,5 +10,5 @@ from
   hive_metastore.odap_features.customer
 where
   timestamp = date(getargument("timestamp")) and
-  sum_amount_in_last_30_days > 50000 and
-  investice_web_visits_count_in_last_90_days > 0
+  transactions_sum_amount_in_last_30d >= 50000 and
+  investice_web_visits_count_in_last_90d > 0

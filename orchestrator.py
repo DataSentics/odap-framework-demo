@@ -8,6 +8,6 @@
 
 # COMMAND ----------
 
-from feature_factory.orchestrate import orchestrate
+from odap.feature_factory.orchestrate import orchestrate
 
 orchestrate()

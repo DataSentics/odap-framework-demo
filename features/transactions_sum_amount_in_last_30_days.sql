@@ -17,7 +17,7 @@ create or replace temporary view card_transactions as (
 select
   customer_id,
   getargument("timestamp") as timestamp,
-  sum(amount_czk) as sum_amount_in_last_30_days
+  sum(amount_czk) as transactions_sum_amount_in_last_30d
 from
   card_transactions
 where
