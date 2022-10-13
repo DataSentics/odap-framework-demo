@@ -4,8 +4,7 @@ create widget text timestamp default "2020-12-12"
 -- COMMAND ----------
 
 select
-  customer_id,
-  timestamp
+  customer_id
 from
   hive_metastore.odap_features.customer
 where
