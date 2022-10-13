@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %pip install ./_packages/odap-1.0.0-py3-none-any.whl
+# MAGIC %pip install ../_packages/odap-1.0.0-py3-none-any.whl
 
 # COMMAND ----------
 
