@@ -15,10 +15,10 @@ parameters:
     segments:
       customers_who_might_be_interested_in_investments:
         exports:
-          - azure_blob
+          - 'azure_blob'
 
-    exports:
-      destinations:
-        azure_blob:
-          attributes:
-            - customer_email
+    exporters:
+      azure_blob:
+        path: '/exports/segments'
+        attributes:
+          - 'customer_email'
