@@ -1,41 +1,32 @@
 from typing import Dict
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
 from odap.feature_factory.config import get_features_table, get_features_table_path
 from odap.segment_factory.config import get_segment_table
 from odap.common.config import get_config_namespace, ConfigNamespace
 
 
-def exporter(segment: str, exporter_config: Dict):
+def export(segment: str, segment_df: DataFrame, segment_config: Dict, export_config: Dict):
     """Simple exporter example
-    Joins the segment table and the feature table
-    and export the columns specified in the exporter configuration.
+    Export DF as CSV to blob storage.
 
     Parameters
     ----------
     segment : str
         The name of the exported segment
+    segment_df : DataFrame
+        Segment dataframe
+    segment_config : Dict
+        The segment configuration specified in the config.yaml file.
     exporter_config : Dict
         The exporter configuration specified in the config.yaml file.
     """
         
     spark = SparkSession.getActiveSession()
     
-    feature_factory_config = get_config_namespace(ConfigNamespace.FEATURE_FACTORY)
-    features_table_name = get_features_table(feature_factory_config)
-    
-    segment_factory_config = get_config_namespace(ConfigNamespace.SEGMENT_FACTORY)
-    segment_table_name = get_segment_table(segment, segment_factory_config)
-    
-    segment_df = spark.read.table(f"hive_metastore.{segment_table_name}")
-    featurestore_df = spark.read.table(f"hive_metastore.{features_table_name}")
-    
-    result_df = segment_df.join(featurestore_df, "customer_id", "inner").select('customer_id', *exporter_config["attributes"])
-    
-    output_path = exporter_config["path"]
+    output_path = export_config["path"]
     output_blob_folder = f"abfss://odap-demo@odapczlakeg2dev.dfs.core.windows.net{output_path}/{segment}"
     
-    result_df.display()
-    (result_df.write
+    (segment_df.write
      .mode("overwrite")
      .option("header", "true")
      .format("csv")
