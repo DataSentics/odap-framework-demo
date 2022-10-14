@@ -41,4 +41,27 @@ def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC # Metadata
+# MAGIC ## investice_web_visits_count_in_last_14d	
+# MAGIC - description: "Investice web visits count in last 14 days"
+# MAGIC ## pujcky_web_visits_count_in_last_14d	
+# MAGIC - description: "Pujcky web visits count in last 14 days"
+# MAGIC ## hypoteky_web_visits_count_in_last_14d
+# MAGIC - description: "Hypoteky web visits count in last 14 days"
+# MAGIC ## investice_web_visits_count_in_last_30d	
+# MAGIC - description: "Investice web visits count in last 30 days"
+# MAGIC ## pujcky_web_visits_count_in_last_30d	
+# MAGIC - description: "Pujcky web visits count in last 30 days"
+# MAGIC ## hypoteky_web_visits_count_in_last_30d	
+# MAGIC - description: "Hypoteky web visits count in last 30 days"
+# MAGIC ## investice_web_visits_count_in_last_90d	
+# MAGIC - description: "Investice web visits count in last 90 days"
+# MAGIC ## pujcky_web_visits_count_in_last_90d	
+# MAGIC - description: "Pujcky web visits count in last 90 days"
+# MAGIC ## hypoteky_web_visits_count_in_last_90d
+# MAGIC - description: "Hypoteky web visits count in last 90 days"
+
+# COMMAND ----------
+
 df_final = wdf.time_windowed(group_keys=["customer_id", "timestamp"], agg_columns_function=product_agg_features)

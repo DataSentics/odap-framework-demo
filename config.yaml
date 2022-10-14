@@ -1,8 +1,13 @@
 parameters:
   featurefactory:
-    table: 'odap_features.customer'
-    path: 'dbfs:/odap_features/customer.delta'
-    
+    features:
+      table: 'odap_features.features_{entity}'
+      path: 'dbfs:/odap_features/features_{entity}.delta'
+
+    metadata:
+      table: 'odap_features.metadata_{entity}'
+      path: 'dbfs:/odap_features/metadata_{entity}.delta'
+
     entities:
       customer:
         id_column: "customer_id"
