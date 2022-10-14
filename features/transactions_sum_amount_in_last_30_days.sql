@@ -14,6 +14,13 @@ create or replace temporary view card_transactions as (
 
 -- COMMAND ----------
 
+-- MAGIC %md
+-- MAGIC # Metadata
+-- MAGIC ## transactions_sum_amount_in_last_30d	
+-- MAGIC - description: "Transactions sum amount in last 30 days"
+
+-- COMMAND ----------
+
 select
   customer_id,
   timestamp(getargument("timestamp")) as timestamp,
