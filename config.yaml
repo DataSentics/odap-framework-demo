@@ -19,11 +19,20 @@ parameters:
     
     segments:
       customers_who_might_be_interested_in_investments:
+        name: "Nová práce"
         exports:
-          - azure_blob
+          - "main_azure_blob_export"
+          - "second_azure_blob_export"
 
     exports:
-      destinations:
-        azure_blob:
-          attributes:
-            - customer_email
+      main_azure_blob_export:
+        type: "azure_blob"
+        path: "/exports/segments"
+        attributes:
+          - "customer_email"
+          
+      second_azure_blob_export:
+        type: "azure_blob"
+        path: "/exports/segments/foo"
+        attributes:
+          - "customer_email"
