@@ -1,8 +1,5 @@
 from typing import Dict
-from pyspark.sql import SparkSession, DataFrame
-from odap.feature_factory.config import get_features_table, get_features_table_path
-from odap.segment_factory.config import get_segment_table
-from odap.common.config import get_config_namespace, ConfigNamespace
+from pyspark.sql import SparkSession, DataFrame, functions as f
 
 
 def export(segment: str, segment_df: DataFrame, segment_config: Dict, export_config: Dict):
@@ -24,11 +21,6 @@ def export(segment: str, segment_df: DataFrame, segment_config: Dict, export_con
     spark = SparkSession.getActiveSession()
     
     output_path = export_config["path"]
-    output_blob_folder = f"dbfs:/fake_azure_blob{output_path}/{segment}"
+    output_blob_path = f"/dbfs/fake_azure_blob{output_path}/{segment}.csv"
     
-    (segment_df.write
-     .mode("overwrite")
-     .option("header", "true")
-     .format("csv")
-     .save(output_blob_folder))
-    
+    (segment_df.withColumn("segment", f.lit(segment_config["name"])).toPandas().to_csv(output_blob_path, index=False))

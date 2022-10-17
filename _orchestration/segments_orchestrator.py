@@ -1,10 +1,5 @@
 # Databricks notebook source
-# MAGIC %pip install ../_demo/_packages/odap-1.0.0-py3-none-any.whl
-
-# COMMAND ----------
-
-# MAGIC %sql
-# MAGIC create widget text timestamp default "2020-12-12"
+# MAGIC %pip install odap==0.0.1
 
 # COMMAND ----------
 

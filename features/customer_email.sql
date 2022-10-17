@@ -1,5 +1,5 @@
 -- Databricks notebook source
-create widget text timestamp default "2020-12-12"
+create widget text timestamp default ""
 
 -- COMMAND ----------
 

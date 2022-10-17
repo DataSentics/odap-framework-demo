@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %pip install ../_demo/_packages/odap-1.0.0-py3-none-any.whl
+# MAGIC %pip install odap==0.0.1
 
 # COMMAND ----------
 
@@ -10,7 +10,7 @@ from odap.feature_factory import time_windows as tw
 
 # COMMAND ----------
 
-dbutils.widgets.text("timestamp", "2020-12-12")
+dbutils.widgets.text("timestamp", "")
 
 # COMMAND ----------
 
