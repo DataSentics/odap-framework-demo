@@ -1,9 +1,5 @@
 # Databricks notebook source
-# MAGIC %pip install ../_packages/odap-1.0.0-py3-none-any.whl
-
-# COMMAND ----------
-
-# MAGIC %pip install ../_packages/odap-1.0.0-py3-none-any.whl
+# MAGIC %pip install ../_demo/_packages/odap-1.0.0-py3-none-any.whl
 
 # COMMAND ----------
 
@@ -38,4 +34,3 @@ segment_name = dbutils.widgets.get("segment_name")
 export_name = dbutils.widgets.get("export_name")
 
 run_export(segment_name=segment_name, export_name=exporter)
-
