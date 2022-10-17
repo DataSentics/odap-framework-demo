@@ -19,7 +19,7 @@ parameters:
     
     segments:
       customers_who_might_be_interested_in_investments:
-        name: "Nová práce"
+        name: "Zájemci o investice"
         exports:
           - "main_azure_blob_export"
           - "second_azure_blob_export"

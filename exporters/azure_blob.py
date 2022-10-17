@@ -24,7 +24,7 @@ def export(segment: str, segment_df: DataFrame, segment_config: Dict, export_con
     spark = SparkSession.getActiveSession()
     
     output_path = export_config["path"]
-    output_blob_folder = f"abfss://odap-demo@odapczlakeg2dev.dfs.core.windows.net{output_path}/{segment}"
+    output_blob_folder = f"dbfs:/fake_azure_blob{output_path}/{segment}"
     
     (segment_df.write
      .mode("overwrite")
