@@ -1,4 +1,4 @@
-# features-factory-demo
+# odap-framework-demo
 
 ## How to use it
 
@@ -6,7 +6,7 @@
 Clone this repo to Databricks Workspace of your liking.
 
 ### Step2
-In Databricks run `_setup/init` notebook which will create raw example tables (customer, card_transactions, web_visits).
+In Databricks run `_demo/_setup/init` notebook which will create raw example tables (customer, card_transactions, web_visits).
 
 ### Step3
 Run `orchestrator` notebook. It will create `odap_features.customer` table with features defined in `features/` folder.
