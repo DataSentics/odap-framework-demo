@@ -1,13 +1,20 @@
 -- Databricks notebook source
-create widget text timestamp default "2020-12-12"
+-- MAGIC %run ../init/target_store
 
 -- COMMAND ----------
 
-create or replace temporary view card_transactions as (
+create widget text timestamp default "";
+create widget text target default "no target"
+
+-- COMMAND ----------
+
+create
+or replace temporary view card_transactions as (
   select
     *
   from
     hive_metastore.odap_offline_sdm_l2.card_transactions
+    join target_store using (customer_id)
   where
     process_date <= timestamp(getargument("timestamp"))
 )
