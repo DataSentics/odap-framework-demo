@@ -11,6 +11,11 @@ from odap.feature_factory import time_windows as tw
 # COMMAND ----------
 
 dbutils.widgets.text("timestamp", "")
+dbutils.widgets.text("target", "")
+
+# COMMAND ----------
+
+# MAGIC %run ../init/target_store
 
 # COMMAND ----------
 
@@ -22,11 +27,19 @@ time_windows = ["14d", "30d", "90d"]
 
 # COMMAND ----------
 
-wdf = tw.WindowedDataFrame(
+wdf_orig = tw.WindowedDataFrame(
     df=spark.read.table("odap_digi_sdm_l2.web_visits"),
     time_column="visit_timestamp",
     time_windows=time_windows,
-).withColumn("timestamp", f.lit(dbutils.widgets.get("timestamp")).cast("timestamp"))
+)
+
+# COMMAND ----------
+
+target_store = spark.read.table("target_store")
+
+# COMMAND ----------
+
+wdf = wdf_orig.join(target_store, on="customer_id").filter(f.col("visit_timestamp") <= f.col("timestamp"))
 
 # COMMAND ----------
 
