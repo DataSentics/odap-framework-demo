@@ -12,6 +12,9 @@ parameters:
       customer:
         id_column: "customer_id"
         id_column_type: "long"
+      account:
+        id_column: "account_id"
+        id_column_type: "long"
   
   segmentfactory:
     table: 'odap_segments.{segment}'
@@ -22,17 +25,13 @@ parameters:
         name: "Zájemci o investice"
         exports:
           - "main_azure_blob_export"
-          - "second_azure_blob_export"
 
     exports:
       main_azure_blob_export:
         type: "azure_blob"
         path: "/exports/segments"
         attributes:
-          - "customer_email"
-          
-      second_azure_blob_export:
-        type: "azure_blob"
-        path: "/exports/segments/foo"
-        attributes:
-          - "customer_email"
+          customer:
+            - "customer_email"
+          account:
+            - "currency"

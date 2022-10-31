@@ -1,8 +1,13 @@
 -- Databricks notebook source
 select
-  customer_id
+  c.customer_id,
+  a.account_id
 from
-  hive_metastore.odap_features.features_customer
+  hive_metastore.odap_features.features_customer AS c
+inner join
+  hive_metastore.odap_features.features_account AS a
+on
+  c.customer_id == a.customer_id
 where
-  transactions_sum_amount_in_last_30d >= 50000 and
-  investice_web_visits_count_in_last_90d > 0
+  c.investice_web_visits_count_in_last_90d > 0 and
+  a.incoming_transactions_sum_amount_in_last_90d >= 200000
