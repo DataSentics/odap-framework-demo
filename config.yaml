@@ -21,7 +21,7 @@ parameters:
     path: 'dbfs:/odap_segments/{segment}.delta'
     
     segments:
-      customers_who_might_be_interested_in_investments:
+      customer_account_investment_interest:
         name: "Zájemci o investice"
         exports:
           - "main_azure_blob_export"

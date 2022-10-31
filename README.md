@@ -12,4 +12,4 @@ In Databricks run `_demo/_setup/init` notebook which will create raw example tab
 Run `orchestrator` notebook. It will create `odap_features.customer` table with features defined in `features/` folder.
 
 ### Step4
-Check the segment `segments/customers_who_might_be_interested_in_investments` by running this notebook.
+Check the segment `segments/customer_account_investment_interest` by running this notebook.
