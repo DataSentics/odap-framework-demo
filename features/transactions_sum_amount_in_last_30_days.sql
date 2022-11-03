@@ -21,10 +21,15 @@ or replace temporary view card_transactions as (
 
 -- COMMAND ----------
 
--- MAGIC %md
--- MAGIC # Metadata
--- MAGIC ## transactions_sum_amount_in_last_30d	
--- MAGIC - description: "Transactions sum amount in last 30 days"
+-- MAGIC %python
+-- MAGIC metadata = {
+-- MAGIC     "category": "transactions",
+-- MAGIC     "features": {
+-- MAGIC         "transactions_sum_amount_in_last_30d": {
+-- MAGIC             "description": "Total volume of transactions in last 30 days",
+-- MAGIC         }
+-- MAGIC     }
+-- MAGIC }
 
 -- COMMAND ----------
 

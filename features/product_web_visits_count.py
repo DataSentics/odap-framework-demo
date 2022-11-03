@@ -1,5 +1,5 @@
 # Databricks notebook source
-# MAGIC %pip install odap==0.0.1
+# MAGIC %pip install odap==0.0.4
 
 # COMMAND ----------
 
@@ -54,26 +54,15 @@ def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC # Metadata
-# MAGIC ## investice_web_visits_count_in_last_14d	
-# MAGIC - description: "Investice web visits count in last 14 days"
-# MAGIC ## pujcky_web_visits_count_in_last_14d	
-# MAGIC - description: "Pujcky web visits count in last 14 days"
-# MAGIC ## hypoteky_web_visits_count_in_last_14d
-# MAGIC - description: "Hypoteky web visits count in last 14 days"
-# MAGIC ## investice_web_visits_count_in_last_30d	
-# MAGIC - description: "Investice web visits count in last 30 days"
-# MAGIC ## pujcky_web_visits_count_in_last_30d	
-# MAGIC - description: "Pujcky web visits count in last 30 days"
-# MAGIC ## hypoteky_web_visits_count_in_last_30d	
-# MAGIC - description: "Hypoteky web visits count in last 30 days"
-# MAGIC ## investice_web_visits_count_in_last_90d	
-# MAGIC - description: "Investice web visits count in last 90 days"
-# MAGIC ## pujcky_web_visits_count_in_last_90d	
-# MAGIC - description: "Pujcky web visits count in last 90 days"
-# MAGIC ## hypoteky_web_visits_count_in_last_90d
-# MAGIC - description: "Hypoteky web visits count in last 90 days"
+# MAGIC %python
+# MAGIC metadata = {
+# MAGIC     "category": "web_visits",
+# MAGIC     "features": {
+# MAGIC         "{product}_web_visits_count_in_last_{time_window}": {
+# MAGIC             "description": "Number of {product} web visits in last {time_window}",
+# MAGIC         }
+# MAGIC     }
+# MAGIC }
 
 # COMMAND ----------
 

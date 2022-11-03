@@ -3,11 +3,16 @@ create widget text timestamp default ""
 
 -- COMMAND ----------
 
--- MAGIC %md
--- MAGIC # Metadata
--- MAGIC ## customer_email
--- MAGIC - description: "Users email"
--- MAGIC - tags: ["email", "sensitive"]
+-- MAGIC %python
+-- MAGIC metadata = {
+-- MAGIC     "category": "personal",
+-- MAGIC     "features": {
+-- MAGIC         "customer_email": {
+-- MAGIC             "description": "User's email",
+-- MAGIC             "tags": ["email", "sensitive"],
+-- MAGIC         }
+-- MAGIC     }
+-- MAGIC }
 
 -- COMMAND ----------
 
