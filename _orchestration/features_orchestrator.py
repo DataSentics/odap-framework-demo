@@ -13,6 +13,10 @@
 
 # COMMAND ----------
 
+# MAGIC %run ../init/window_functions
+
+# COMMAND ----------
+
 from odap.feature_factory.orchestrate import orchestrate
 
 orchestrate()
