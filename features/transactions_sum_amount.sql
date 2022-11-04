@@ -3,6 +3,10 @@
 
 -- COMMAND ----------
 
+-- MAGIC %run ../init/window_functions
+
+-- COMMAND ----------
+
 create widget text timestamp default "";
 create widget text target default "no target"
 
@@ -25,8 +29,8 @@ or replace temporary view card_transactions as (
 -- MAGIC metadata = {
 -- MAGIC     "category": "transactions",
 -- MAGIC     "features": {
--- MAGIC         "transactions_sum_amount_in_last_30d": {
--- MAGIC             "description": "Total volume of transactions in last 30 days",
+-- MAGIC         "transactions_sum_amount_in_last_{time_window}": {
+-- MAGIC             "description": "Total volume of transactions in last {time_window}",
 -- MAGIC         }
 -- MAGIC     }
 -- MAGIC }
@@ -35,11 +39,11 @@ or replace temporary view card_transactions as (
 
 select
   customer_id,
-  timestamp(getargument("timestamp")) as timestamp,
-  sum(amount_czk) as transactions_sum_amount_in_last_30d
+  timestamp,
+  sum(time_windowed_double(amount_czk, timestamp, process_date, "30 days")) as transactions_sum_amount_in_last_30d,
+  sum(time_windowed_double(amount_czk, timestamp, process_date, "60 days")) as transactions_sum_amount_in_last_60d,
+  sum(time_windowed_double(amount_czk, timestamp, process_date, "90 days")) as transactions_sum_amount_in_last_90d
 from
   card_transactions
-where
-  process_date between date(getargument("timestamp")) - interval 30 days and date(getargument("timestamp"))
 group by
-  customer_id
+  customer_id, timestamp
