@@ -15,6 +15,6 @@ ON
 FULL JOIN 
   max_date
 WHERE
-  c.investice_web_visits_count_in_last_90d > 0 AND
-  a.incoming_transactions_sum_amount_in_last_90d >= 299000 AND
+  c.investice_web_visits_count_in_last_90d > 1 AND
+  a.incoming_transactions_sum_amount_in_last_90d >= 270000 AND
   c.timestamp == max_date

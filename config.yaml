@@ -17,21 +17,29 @@ parameters:
         id_column_type: "long"
   
   segmentfactory:
-    table: 'odap_segments.{segment}'
-    path: 'dbfs:/odap_segments/{segment}.delta'
+    log:
+      table: "odap_segments.export_logs"
+      path: "dbfs:/odap_segments/export_logs.delta"
     
-    segments:
-      customer_account_investment_interest:
-        name: "Zájemci o investice"
-        exports:
-          - "main_azure_blob_export"
+    segment:
+      table: "odap_segments.segments"
+      path: "dbfs:/odap_segments/segments.delta"
 
-    exports:
+    exports:          
+      my_awesome_alert:
+        destination: main_azure_blob_export
+        segments:
+          customer_account_investment_interest:
+            name: "Zájemci o investice"
+          customer_account_investment_interest_second:
+            name: "Lorem ipsum"  
+
+    destinations:
       main_azure_blob_export:
-        type: "azure_blob"
-        path: "/exports/segments"
+        type: azure_blob
+        path: /exports/segments
         attributes:
           customer:
-            - "customer_email"
+            - customer_email
           account:
-            - "currency"
+            - currency
