@@ -9,11 +9,22 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+  - stage: MainStage
+    displayName: Main Stage
+    jobs:
+      - job: MainJob
+        displayName: Build, Test & Push
+        steps:
+        - task: Pythonscript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: './script1.py'
+          env:
+            PASSWORD: $(password) 
+            USERNAME: $(username) 
+        - task: PythonScript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: '$(System.DefaultWorkingDirectory)/_cicd/check_jobs.py'
+            arguments: '--token $(TOKEN) --host $(HOST) --tag $(TAG) --cluster $(CLUSTER)'
