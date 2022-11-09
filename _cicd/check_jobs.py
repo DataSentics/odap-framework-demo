@@ -3,7 +3,9 @@ import json
 import os
 from databricks_cli.sdk import ApiClient, JobsService
 
-
+import sys
+  
+print(sys.argv)
 with open("config.yaml", "r") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)["parameters"]["segmentfactory"][
         "exports"
