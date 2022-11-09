@@ -16,13 +16,6 @@ stages:
       - job: MainJob
         displayName: Build, Test & Push
         steps:
-        - task: Pythonscript@0
-          inputs:
-            scriptSource: 'filePath'
-            scriptPath: './script1.py'
-          env:
-            PASSWORD: $(password) 
-            USERNAME: $(username) 
         - task: PythonScript@0
           inputs:
             scriptSource: 'filePath'
