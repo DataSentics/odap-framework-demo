@@ -3,19 +3,19 @@ import json
 from databricks_cli.sdk import ApiClient, JobsService
 
 import sys
-
+print(sys.argv)
 with open("config.yaml", "r") as f:
     config = yaml.load(f, Loader=yaml.FullLoader)["parameters"]["segmentfactory"][
         "exports"
     ]
 
-api_client = ApiClient(host=sys.argv[1], token=sys.argv[0])
+api_client = ApiClient(host=sys.argv[2], token=sys.argv[1])
 jobs_service = JobsService(client=api_client)
 
 ids = []
 existing = []
 for x in jobs_service.list_jobs()["jobs"]:
-    if "tags" in x["settings"] and x["settings"]["tags"]["env"] == sys.argv[2]:
+    if "tags" in x["settings"] and x["settings"]["tags"]["env"] == sys.argv[3]:
         ids.append(x["settings"]["tags"]["id"])
         existing.append(x)
 
@@ -46,14 +46,14 @@ for export in config:
                             },
                         }
                     },
-                    **{"new_cluster": json.loads("".join(sys.argv[3:]))},
+                    **{"new_cluster": json.loads("".join(sys.argv[4:]))},
                 },
                 **{
                     "name": f"Segment export '{selected_seg['lit']['name']}'",
                 },
                 **{
                     "tags": {
-                        "env": sys.argv[2],
+                        "env": sys.argv[3],
                         "id": segment,
                     },
                     "max_concurrent_runs": 1,
