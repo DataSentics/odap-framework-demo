@@ -16,6 +16,9 @@ stages:
       - job: MainJob
         displayName: Build, Test & Push
         steps:
+        - task: CmdLine@2
+          inputs:
+            script: 'pip3 install databricks-cli==0.17.3'
         - task: PythonScript@0
           inputs:
             scriptSource: 'filePath'
