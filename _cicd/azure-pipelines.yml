@@ -9,11 +9,18 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+stages:
+  - stage: MainStage
+    displayName: Main Stage
+    jobs:
+      - job: MainJob
+        displayName: Build, Test & Push
+        steps:
+        - task: CmdLine@2
+          inputs:
+            script: 'pip3 install databricks-cli==0.17.3'
+        - task: PythonScript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: '$(System.DefaultWorkingDirectory)/_cicd/check_jobs.py'
+            arguments: '--token $(TOKEN) --host $(HOST) --tag $(TAG) --cluster $(CLUSTER)'
