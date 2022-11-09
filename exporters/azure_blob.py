@@ -2,7 +2,7 @@ from typing import Dict
 from pyspark.sql import SparkSession, DataFrame, functions as f
 
 
-def export(segment: str, segment_df: DataFrame, segment_config: Dict, export_config: Dict):
+def export(export_name: str, segment_df: DataFrame, export_config: Dict, destination_config: Dict):
     """Simple exporter example
     Export DF as CSV to blob storage.
 
@@ -17,10 +17,22 @@ def export(segment: str, segment_df: DataFrame, segment_config: Dict, export_con
     exporter_config : Dict
         The exporter configuration specified in the config.yaml file.
     """
-        
+
     spark = SparkSession.getActiveSession()
     
-    output_path = export_config["path"]
-    output_blob_path = f"/dbfs/fake_azure_blob{output_path}/{segment}.csv"
+    output_path = destination_config["path"]
+    output_blob_path = f"/dbfs/fake_azure_blob{output_path}/{export_name}.csv"
     
-    (segment_df.withColumn("segment", f.lit(segment_config["name"])).toPandas().to_csv(output_blob_path, index=False))
+    segments_config = export_config["segments"]
+
+    names_dictionary_df = spark.createDataFrame(
+        map(lambda k, v: [k, v["name"]], segments_config.keys(), segments_config.values()),
+        ["segment", "name"]
+    )
+
+    (
+        segment_df
+         .join(names_dictionary_df, "segment", "outer")
+         .select("name", *segment_df.columns)
+         .toPandas().to_csv(output_blob_path, index=False)
+    )
