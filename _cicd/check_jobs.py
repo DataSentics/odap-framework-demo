@@ -15,7 +15,7 @@ jobs_service = JobsService(client=api_client)
 ids = []
 existing = []
 for x in jobs_service.list_jobs()["jobs"]:
-    if "tags" in x["settings"] and x["settings"]["tags"]["env"] == os.environ["tag"],:
+    if "tags" in x["settings"] and x["settings"]["tags"]["env"] == os.environ["tag"]:
         ids.append(x["settings"]["tags"]["id"])
         existing.append(x)
 
