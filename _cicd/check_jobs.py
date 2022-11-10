@@ -40,7 +40,7 @@ for export in config:
                         "notebook_path": "odap-framework-demo/_orchestration/job_orchestrator",
                         "base_parameters": {
                             "segment_names": [selected_seg["segments"].keys()],
-                            "export_name": config[export]["destinations"][0],
+                            "export_name": config[export]["destination"],
                         },
                     }
                 },
