@@ -26,7 +26,7 @@ for export in config:
             "pause_status": "PAUSED",
         }
         if "schedule" in config[export]:
-            new_schedule = config[export]["segments"]
+            new_schedule = config[export]["schedule"]
         jobs_service.update_job(
             job_id=existing[ids.index(export)]["job_id"],
             new_settings={"schedule": new_schedule},
