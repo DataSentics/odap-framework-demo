@@ -39,7 +39,7 @@ for export in config:
                     "notebook_task": {
                         "notebook_path": "odap-framework-demo/_orchestration/job_orchestrator",
                         "base_parameters": {
-                            "segment_names": [selected_seg["segments"].keys()],
+                            "segment_names": json.dumps(list(selected_seg["segments"].keys())),
                             "export_name": config[export]["destination"],
                         },
                     }
@@ -47,7 +47,7 @@ for export in config:
                 **{"new_cluster": json.loads(sys.argv[4].replace("'", '"'))},
             },
             **{
-                "name": f"Segment export '{export}'",
+                "name": f"Segment export {export}",
             },
             **{
                 "tags": {
