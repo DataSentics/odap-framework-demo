@@ -44,7 +44,7 @@ for export in config:
                         },
                     }
                 },
-                **{"new_cluster": sys.argv[4]},
+                **{"new_cluster": json.loads(sys.argv[4])},
             },
             **{
                 "name": f"Segment export '{export}'",
