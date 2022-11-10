@@ -1,12 +1,12 @@
 parameters:
   featurefactory:
     features:
-      table: 'odap_features.features_{entity}'
-      path: 'dbfs:/odap_features/features_{entity}.delta'
+      table: "odap_features.features_{entity}"
+      path: "dbfs:/odap_features/features_{entity}.delta"
 
     metadata:
-      table: 'odap_features.metadata_{entity}'
-      path: 'dbfs:/odap_features/metadata_{entity}.delta'
+      table: "odap_features.metadata_{entity}"
+      path: "dbfs:/odap_features/metadata_{entity}.delta"
 
     entities:
       customer:
@@ -17,21 +17,33 @@ parameters:
         id_column_type: "long"
   
   segmentfactory:
-    table: 'odap_segments.{segment}'
-    path: 'dbfs:/odap_segments/{segment}.delta'
+    log:
+      table: "odap_segments.export_logs"
+      path: "dbfs:/odap_segments/export_logs.delta"
     
-    segments:
-      customer_account_investment_interest:
-        name: "Zájemci o investice"
-        exports:
-          - "main_azure_blob_export"
+    segment:
+      table: "odap_segments.segments"
+      path: "dbfs:/odap_segments/segments.delta"
 
-    exports:
+    exports:          
+      my_awesome_alert:
+        destination: main_azure_blob_export
+        schedule:
+          quartz_cron_expression: "34 38 18 * * ?"
+          timezone_id: "UTC"
+          pause_status: "UNPAUSED"
+        segments:
+          customer_account_investment_interest:
+            name: "Zájemci o investice"
+          customer_account_investment_interest_second:
+            name: "Lorem ipsum"          
+
+    destinations:
       main_azure_blob_export:
-        type: "azure_blob"
-        path: "/exports/segments"
+        type: azure_blob
+        path: /exports/segments
         attributes:
           customer:
-            - "customer_email"
+            - customer_email
           account:
-            - "currency"
+            - currency

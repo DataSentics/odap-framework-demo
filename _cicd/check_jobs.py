@@ -19,51 +19,50 @@ for x in jobs_service.list_jobs()["jobs"]:
         existing.append(x)
 
 for export in config:
-    for segment in config[export]["segments"]:
-        if segment in ids:
-            new_schedule = {
-                "quartz_cron_expression": "0 0 0 1 * ?",
-                "timezone_id": "UTC",
-                "pause_status": "PAUSED",
-            }
-            if "schedule" in config[export]["segments"][segment]:
-                new_schedule = config[export]["segments"][segment]["schedule"]
-            jobs_service.update_job(
-                job_id=existing[ids.index(segment)]["job_id"],
-                new_settings={"schedule": new_schedule},
-            )
-        else:
-            selected_seg = config[export]["segments"][segment]
-            kwargs = {
+    if export in ids:
+        new_schedule = {
+            "quartz_cron_expression": "0 0 0 1 * ?",
+            "timezone_id": "UTC",
+            "pause_status": "PAUSED",
+        }
+        if "schedule" in config[export]:
+            new_schedule = config[export]["segments"]
+        jobs_service.update_job(
+            job_id=existing[ids.index(export)]["job_id"],
+            new_settings={"schedule": new_schedule},
+        )
+    else:
+        selected_seg = config[export]
+        kwargs = {
+            **{
                 **{
-                    **{
-                        "notebook_task": {
-                            "notebook_path": "odap-framework-demo/_orchestration/job_orchestrator",
-                            "base_parameters": {
-                                "segment_name": segment,
-                                "export_name": config[export]["destinations"][0],
-                            },
-                        }
-                    },
-                    **{"new_cluster": json.loads("".join(sys.argv[4:]))},
+                    "notebook_task": {
+                        "notebook_path": "odap-framework-demo/_orchestration/job_orchestrator",
+                        "base_parameters": {
+                            "segment_names": [selected_seg["segments"].keys()],
+                            "export_name": config[export]["destinations"][0],
+                        },
+                    }
                 },
-                **{
-                    "name": f"Segment export '{selected_seg['lit']['name']}'",
+                **{"new_cluster": json.loads("".join(sys.argv[4:]))},
+            },
+            **{
+                "name": f"Segment export '{export}'",
+            },
+            **{
+                "tags": {
+                    "env": sys.argv[3],
+                    "id": export,
                 },
-                **{
-                    "tags": {
-                        "env": sys.argv[3],
-                        "id": segment,
-                    },
-                    "max_concurrent_runs": 1,
-                    "schedule": selected_seg["schedule"]
-                    if "schedule" in selected_seg
-                    else None,
-                    "git_source": {
-                        "git_url": "https://github.com/DataSentics/odap-framework-demo.git",
-                        "git_provider": "gitHub",
-                        "git_branch": "cicd_branch",
-                    },
+                "max_concurrent_runs": 1,
+                "schedule": selected_seg["schedule"]
+                if "schedule" in selected_seg
+                else None,
+                "git_source": {
+                    "git_url": "https://github.com/DataSentics/odap-framework-demo.git",
+                    "git_provider": "gitHub",
+                    "git_branch": "cicd_branch",
                 },
-            }
-            jobs_service.create_job(**kwargs)
+            },
+        }
+        jobs_service.create_job(**kwargs)
