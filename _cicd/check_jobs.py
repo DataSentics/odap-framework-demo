@@ -33,6 +33,7 @@ for export in config:
         )
     else:
         selected_seg = config[export]
+        print("".join(sys.argv[4:]))
         kwargs = {
             **{
                 **{
