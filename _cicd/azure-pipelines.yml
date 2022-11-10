@@ -23,5 +23,5 @@ stages:
           inputs:
             scriptSource: 'filePath'
             scriptPath: '$(System.DefaultWorkingDirectory)/_cicd/check_jobs.py'
-            arguments: '$(TOKEN) $(HOST) $(TAG) $(CLUSTER)'
+            arguments: '$(TOKEN) $(HOST) $(TAG) "$(CLUSTER)"'
             workingDirectory: '$(System.DefaultWorkingDirectory)'
