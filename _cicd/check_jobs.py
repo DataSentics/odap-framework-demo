@@ -33,7 +33,7 @@ for export in config:
         )
     else:
         selected_seg = config[export]
-        print("".join(sys.argv[4:]))
+        print(sys.argv[4])
         kwargs = {
             **{
                 **{
@@ -45,7 +45,7 @@ for export in config:
                         },
                     }
                 },
-                **{"new_cluster": json.loads("".join(sys.argv[4:]))},
+                **{"new_cluster": json.loads(sys.argv[4])},
             },
             **{
                 "name": f"Segment export '{export}'",
