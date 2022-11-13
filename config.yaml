@@ -36,7 +36,18 @@ parameters:
           customer_account_investment_interest:
             name: "Zájemci o investice"
           customer_account_investment_interest_second:
-            name: "Lorem ipsum"          
+            name: "Lorem ipsum"        
+      my_awesome_alert_2:
+        destination: main_azure_blob_export
+        schedule:
+          quartz_cron_expression: "34 38 18 * * ?"
+          timezone_id: "UTC"
+          pause_status: "UNPAUSED"
+        segments:
+          customer_account_investment_interest:
+            name: "Zájemci o investice"
+          customer_account_investment_interest_second:
+            name: "Lorem ipsum"       
 
     destinations:
       main_azure_blob_export:
