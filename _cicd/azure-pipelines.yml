@@ -4,14 +4,30 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+- main
+- cicd_branch
+
 
 pool:
   vmImage: ubuntu-latest
 
 stages:
-  - stage: MainStage
-    displayName: Main Stage
+  - stage: CheckConfig
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    displayName: Check config
+    jobs:
+      - job: ConfigCheck
+        displayName: Check if config is valid
+        steps:
+          - task: PythonScript@0
+            inputs:
+              scriptSource: 'filePath'
+              scriptPath: '$(System.DefaultWorkingDirectory)/_cicd/check_config.py'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+
+  - stage: SyncExports
+    condition: and(succeededOrFailed(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    displayName: Sync exports
     jobs:
       - job: MainJob
         displayName: Build, Test & Push
