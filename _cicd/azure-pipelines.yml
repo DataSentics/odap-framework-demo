@@ -26,7 +26,7 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)'
 
   - stage: SyncExports
-    condition: and(succeededOrFailed(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+    condition: and(succeededOrFailed(), eq(variables['Build.SourceBranch'], 'refs/heads/cicd_branch'))
     displayName: Sync exports
     jobs:
       - job: MainJob
