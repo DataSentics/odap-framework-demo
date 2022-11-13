@@ -27,6 +27,10 @@ parameters:
 
     exports:          
       my_awesome_alert:
+        schedule:
+          quartz_cron_expression: "34 38 18 * * ?"
+          timezone_id: "UTC"
+          pause_status: "UNPAUSED"
         destination: main_azure_blob_export
         segments:
           customer_account_investment_interest:
