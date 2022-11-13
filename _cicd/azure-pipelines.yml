@@ -26,7 +26,7 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)'
 
   - stage: SyncExports
-    condition: and(succeeded(), startsWith(variables['Build.SourceVersionMessage'], 'Merge pull request'))
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest')
     displayName: Sync exports
     jobs:
       - job: MainJob
