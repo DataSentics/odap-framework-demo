@@ -4,9 +4,10 @@ from databricks_cli.sdk import ApiClient, JobsService
 import sys
 
 with open("config.yaml", "r") as f:
-    config = yaml.load(f, Loader=yaml.FullLoader)["parameters"]["segmentfactory"][
-        "exports"
-    ]
+    yml = yaml.load(f, Loader=yaml.FullLoader)
+    config = yml["parameters"]["segmentfactory"]["exports"]
+    execution_parameters = yml["execution"]
+
 
 api_client = ApiClient(host=sys.argv[2], token=sys.argv[1])
 jobs_service = JobsService(client=api_client)
@@ -14,9 +15,13 @@ jobs_service = JobsService(client=api_client)
 ids = []
 existing = []
 for x in jobs_service.list_jobs()["jobs"]:
-    if "tags" in x["settings"] and x["settings"]["tags"]["env"] == sys.argv[3]:
+    if (
+        "tags" in x["settings"]
+        and x["settings"]["tags"]["env"] == execution_parameters["job_tag"]
+    ):
         ids.append(x["settings"]["tags"]["id"])
         existing.append(x)
+
 
 for export in config:
     if export in ids:
@@ -46,14 +51,14 @@ for export in config:
                         },
                     }
                 },
-                **{"new_cluster": json.loads(sys.argv[4].replace("'", '"'))},
+                **{"new_cluster": execution_parameters["cluster"]},
             },
             **{
                 "name": f"Segment export {export}",
             },
             **{
                 "tags": {
-                    "env": sys.argv[3],
+                    "env": execution_parameters["job_tag"],
                     "id": export,
                 },
                 "max_concurrent_runs": 1,
@@ -63,7 +68,7 @@ for export in config:
                 "git_source": {
                     "git_url": "https://github.com/DataSentics/odap-framework-demo.git",
                     "git_provider": "gitHub",
-                    "git_branch": "main",
+                    "git_branch": "cicd_branch",
                 },
             },
         }

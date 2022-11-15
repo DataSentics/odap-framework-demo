@@ -5,7 +5,6 @@
 
 trigger:
 - main
-- cicd_branch
 
 
 pool:
@@ -26,7 +25,7 @@ stages:
               workingDirectory: '$(System.DefaultWorkingDirectory)'
 
   - stage: SyncExports
-    condition: and(succeeded(), startsWith(variables['Build.SourceVersionMessage'], 'Merge pull request'))
+    condition: ne(variables['Build.Reason'], 'PullRequest')
     displayName: Sync exports
     jobs:
       - job: MainJob
@@ -39,5 +38,5 @@ stages:
           inputs:
             scriptSource: 'filePath'
             scriptPath: '$(System.DefaultWorkingDirectory)/_cicd/check_jobs.py'
-            arguments: '$(TOKEN) $(HOST) $(TAG) "$(CLUSTER)"'
+            arguments: '$(TOKEN) $(HOST)'
             workingDirectory: '$(System.DefaultWorkingDirectory)'

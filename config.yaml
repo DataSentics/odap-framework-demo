@@ -1,12 +1,12 @@
 parameters:
   featurefactory:
     features:
-      table: 'odap_features.features_{entity}'
-      path: 'dbfs:/odap_features/features_{entity}.delta'
+      table: "odap_features.features_{entity}"
+      path: "dbfs:/odap_features/features_{entity}.delta"
 
     metadata:
-      table: 'odap_features.metadata_{entity}'
-      path: 'dbfs:/odap_features/metadata_{entity}.delta'
+      table: "odap_features.metadata_{entity}"
+      path: "dbfs:/odap_features/metadata_{entity}.delta"
 
     entities:
       customer:
@@ -15,28 +15,39 @@ parameters:
       account:
         id_column: "account_id"
         id_column_type: "long"
-  
+
   segmentfactory:
     log:
       table: "odap_segments.export_logs"
       path: "dbfs:/odap_segments/export_logs.delta"
-    
+
     segment:
       table: "odap_segments.segments"
       path: "dbfs:/odap_segments/segments.delta"
 
-    exports:          
+    exports:
       my_awesome_alert:
+        destination: main_azure_blob_export
         schedule:
           quartz_cron_expression: "34 38 18 * * ?"
           timezone_id: "UTC"
           pause_status: "UNPAUSED"
-        destination: main_azure_blob_export
         segments:
           customer_account_investment_interest:
             name: "Zájemci o investice"
           customer_account_investment_interest_second:
-            name: "Lorem ipsum"  
+            name: "Lorem ipsum"
+      my_awesome_alert_5:
+        destination: main_azure_blob_export
+        schedule:
+          quartz_cron_expression: "34 38 18 * * ?"
+          timezone_id: "UTC"
+          pause_status: "UNPAUSED"
+        segments:
+          customer_account_investment_interest:
+            name: "Zájemci o investice"
+          customer_account_investment_interest_second:
+            name: "Lorem ipsum"
 
     destinations:
       main_azure_blob_export:
@@ -47,3 +58,26 @@ parameters:
             - customer_email
           account:
             - currency
+
+execution:
+  job_tag: test
+  cluster:
+    spark_version: "10.4.x-scala2.12"
+    spark_conf:
+      spark.databricks.delta.preview.enabled: "true"
+      fs.azure.account.oauth2.client.id.odapczlakeg2test.dfs.core.windows.net: "{{secrets/unit-kv/dbx-client-id}}"
+      spark.client_secret: "{{secrets/unit-kv/dbx-client-secret}}"
+      fs.azure.account.oauth.provider.type.odapczlakeg2test.dfs.core.windows.net: "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider"
+      fs.azure.account.auth.type.odapczlakeg2test.dfs.core.windows.net: "OAuth"
+      fs.azure.account.oauth2.client.secret.odapczlakeg2test.dfs.core.windows.net: "{{secrets/unit-kv/dbx-client-secret}}"
+      fs.azure.account.oauth2.client.endpoint.odapczlakeg2test.dfs.core.windows.net: "https://login.microsoftonline.com/585127aa-8691-4f25-9777-8cb78ccf0d91/oauth2/token"
+    custom_tags:
+      PxPorpuse: "ExportImport"
+    spark_env_vars:
+      READ_ENV: test
+      APP_ENV: test
+      TENANT_ID: "585127aa-8691-4f25-9777-8cb78ccf0d91"
+    instance_pool_id: "0712-081441-voile3-pool-dt4ut8z6"
+    data_security_mode: "NONE"
+    runtime_engine: "STANDARD"
+    num_workers: 1
