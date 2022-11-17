@@ -67,17 +67,9 @@ execution:
       spark.databricks.delta.preview.enabled: "true"
       fs.azure.account.oauth2.client.id.odapczlakeg2test.dfs.core.windows.net: "{{secrets/unit-kv/dbx-client-id}}"
       spark.client_secret: "{{secrets/unit-kv/dbx-client-secret}}"
-      fs.azure.account.oauth.provider.type.odapczlakeg2test.dfs.core.windows.net: "org.apache.hadoop.fs.azurebfs.oauth2.ClientCredsTokenProvider"
-      fs.azure.account.auth.type.odapczlakeg2test.dfs.core.windows.net: "OAuth"
-      fs.azure.account.oauth2.client.secret.odapczlakeg2test.dfs.core.windows.net: "{{secrets/unit-kv/dbx-client-secret}}"
-      fs.azure.account.oauth2.client.endpoint.odapczlakeg2test.dfs.core.windows.net: "https://login.microsoftonline.com/585127aa-8691-4f25-9777-8cb78ccf0d91/oauth2/token"
     custom_tags:
       PxPorpuse: "ExportImport"
-    spark_env_vars:
-      READ_ENV: test
-      APP_ENV: test
-      TENANT_ID: "585127aa-8691-4f25-9777-8cb78ccf0d91"
-    instance_pool_id: "0712-081441-voile3-pool-dt4ut8z6"
+    node_type_id: "Standard_D4ds_v4"
     data_security_mode: "NONE"
     runtime_engine: "STANDARD"
     num_workers: 1
