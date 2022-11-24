@@ -1,0 +1,42 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- main
+
+
+pool:
+  vmImage: ubuntu-latest
+
+stages:
+  - stage: CheckConfig
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    displayName: Check config
+    jobs:
+      - job: ConfigCheck
+        displayName: Check if config is valid
+        steps:
+          - task: PythonScript@0
+            inputs:
+              scriptSource: 'filePath'
+              scriptPath: '$(System.DefaultWorkingDirectory)/_cicd/check_config.py'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+
+  - stage: SyncExports
+    condition: ne(variables['Build.Reason'], 'PullRequest')
+    displayName: Sync exports
+    jobs:
+      - job: MainJob
+        displayName: Build, Test & Push
+        steps:
+        - task: CmdLine@2
+          inputs:
+            script: 'pip3 install databricks-cli==0.17.3'
+        - task: PythonScript@0
+          inputs:
+            scriptSource: 'filePath'
+            scriptPath: '$(System.DefaultWorkingDirectory)/_cicd/check_jobs.py'
+            arguments: '$(TOKEN) $(HOST)'
+            workingDirectory: '$(System.DefaultWorkingDirectory)'

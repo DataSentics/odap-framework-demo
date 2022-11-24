@@ -1,12 +1,12 @@
 parameters:
   featurefactory:
     features:
-      table: 'odap_features.features_{entity}'
-      path: 'dbfs:/odap_features/features_{entity}.delta'
+      table: "odap_features.features_{entity}"
+      path: "dbfs:/odap_features/features_{entity}.delta"
 
     metadata:
-      table: 'odap_features.metadata_{entity}'
-      path: 'dbfs:/odap_features/metadata_{entity}.delta'
+      table: "odap_features.metadata_{entity}"
+      path: "dbfs:/odap_features/metadata_{entity}.delta"
 
     entities:
       customer:
@@ -15,24 +15,39 @@ parameters:
       account:
         id_column: "account_id"
         id_column_type: "long"
-  
+
   segmentfactory:
     log:
       table: "odap_segments.export_logs"
       path: "dbfs:/odap_segments/export_logs.delta"
-    
+
     segment:
       table: "odap_segments.segments"
       path: "dbfs:/odap_segments/segments.delta"
 
-    exports:          
+    exports:
       my_awesome_alert:
         destination: main_azure_blob_export
+        schedule:
+          quartz_cron_expression: "34 38 18 * * ?"
+          timezone_id: "UTC"
+          pause_status: "UNPAUSED"
         segments:
           customer_account_investment_interest:
             name: "Zájemci o investice"
           customer_account_investment_interest_second:
-            name: "Lorem ipsum"  
+            name: "Lorem ipsum"
+      my_awesome_alert_5:
+        destination: main_azure_blob_export
+        schedule:
+          quartz_cron_expression: "34 38 18 * * ?"
+          timezone_id: "UTC"
+          pause_status: "UNPAUSED"
+        segments:
+          customer_account_investment_interest:
+            name: "Zájemci o investice"
+          customer_account_investment_interest_second:
+            name: "Lorem ipsum"
 
     destinations:
       main_azure_blob_export:
@@ -43,3 +58,14 @@ parameters:
             - customer_email
           account:
             - currency
+
+execution:
+  job_tag: test
+  cluster:
+    spark_version: "10.4.x-scala2.12"
+    custom_tags:
+      PxPorpuse: "ExportImport"
+    node_type_id: "Standard_D4ds_v4"
+    data_security_mode: "NONE"
+    runtime_engine: "STANDARD"
+    num_workers: 1
