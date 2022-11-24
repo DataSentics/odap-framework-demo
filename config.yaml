@@ -63,10 +63,6 @@ execution:
   job_tag: test
   cluster:
     spark_version: "10.4.x-scala2.12"
-    spark_conf:
-      spark.databricks.delta.preview.enabled: "true"
-      fs.azure.account.oauth2.client.id.odapczlakeg2test.dfs.core.windows.net: "{{secrets/unit-kv/dbx-client-id}}"
-      spark.client_secret: "{{secrets/unit-kv/dbx-client-secret}}"
     custom_tags:
       PxPorpuse: "ExportImport"
     node_type_id: "Standard_D4ds_v4"
