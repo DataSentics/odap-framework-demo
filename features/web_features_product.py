@@ -35,6 +35,20 @@ from odap.feature_factory import time_windows as tw
 
 # COMMAND ----------
 
+# MAGIC %md #### Create widgets
+
+# COMMAND ----------
+
+dbutils.widgets.text("timestamp", "")
+dbutils.widgets.text("target", "")
+dbutils.widgets.text("entity_column_name", "")
+
+# COMMAND ----------
+
+entity_id_column_name = dbutils.widgets.get("entity_column_name")
+
+# COMMAND ----------
+
 # MAGIC %md #### Source
 
 # COMMAND ----------
@@ -63,7 +77,7 @@ metadata = {
         "web_analytics_{product}_visits_count_{time_window}": {
             "description": "How many times the client visited web pages containing information about {product}s in last {time_window}.",
             "category": "digital_product",
-            "fillna_with": 0
+            "fillna_with": None
         },
         "web_analytics_{product}_days_since_last_visit_{time_window}": {
             "description": "Number of days since the last visit of the web page containing information about {product}s in last {time_window}.",
@@ -72,6 +86,18 @@ metadata = {
         },
     }
 }
+
+# COMMAND ----------
+
+# MAGIC %md ### Data quality checks
+
+# COMMAND ----------
+
+dq_checks = [
+	'missing_percent(web_analytics_loan_visits_count_14d) < 50%',
+    'missing_percent(web_analytics_loan_visits_count_30d) < 50%',
+    'missing_percent(web_analytics_loan_visits_count_90d) < 50%',
+]
 
 # COMMAND ----------
 

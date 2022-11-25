@@ -15,7 +15,8 @@
 
 # COMMAND ----------
 
-from pyspark.sql import functions as f
+from pyspark.sql import Column, functions as f
+from odap.common.functions import most_common
 from odap.feature_factory import time_windows as tw
 from typing import List
 
@@ -40,7 +41,7 @@ entity_id_column_name = dbutils.widgets.get("entity_column_name")
 # COMMAND ----------
 
 wdf_digi_sdm = tw.WindowedDataFrame(
-    df=spark.read.table("dev_new_csas_odap_digi_sdm_l2.digi_sdm"),
+    df=spark.read.table("odap_digi_sdm_l2.digi_sdm").withColumnRenamed("user_properties_csas_user_id", "customer_id"),
     time_column="event_date",
     time_windows=["14d", "30d", "90d"],
 )
@@ -62,10 +63,37 @@ metadata = {
     "features": {
         "web_analytics_traffic_medium_most_common_{time_window}": {
             "description": "Most common traffic medium (direct, paid, ..) the client is acquired by in last {time_window}.",
-            "fillna_with": None
+            "fillna_with": "unknown_category"
         },
     }
 }
+
+# COMMAND ----------
+
+# MAGIC %md ### Data quality checks
+
+# COMMAND ----------
+
+dq_checks = [
+	{
+            "invalid_count(web_analytics_traffic_medium_most_common_14d) = 0": {
+	        "valid values": ["organic", "cpc", "referral", "cpm", "e-mail", "paidsocial", "social", "sms", "logout_banner", "(none)"],
+            "warn": "when != 0"
+		},
+    },
+    {
+        	"invalid_count(web_analytics_traffic_medium_most_common_30d) = 0": {
+	        "valid values": ["organic", "cpc", "referral", "cpm", "e-mail", "paidsocial", "social", "sms", "logout_banner", "(none)"],
+            "warn": "when != 0"
+		},
+    },
+    {
+        	"invalid_count(web_analytics_traffic_medium_most_common_90d) = 0": {
+	        "valid values": ["organic", "cpc", "referral", "cpm", "e-mail", "paidsocial", "social", "sms", "logout_banner", "(none)"],
+            "warn": "when != 0"
+		},
+	}
+]
 
 # COMMAND ----------
 
