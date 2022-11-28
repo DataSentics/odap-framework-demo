@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 from pyspark.sql import SparkSession, DataFrame, functions as f
 
@@ -22,7 +23,9 @@ def export(export_name: str, segment_df: DataFrame, export_config: Dict, destina
     
     output_path = destination_config["path"]
     output_blob_path = f"/dbfs/fake_azure_blob{output_path}/{export_name}.csv"
-    
+
+    os.makedirs(os.path.dirname(output_blob_path), exist_ok=True)
+
     segments_config = export_config["segments"]
 
     names_dictionary_df = spark.createDataFrame(

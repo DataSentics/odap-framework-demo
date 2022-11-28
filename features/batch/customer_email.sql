@@ -16,6 +16,13 @@ create widget text timestamp default ""
 
 -- COMMAND ----------
 
+-- MAGIC %python
+-- MAGIC dq_checks = [
+-- MAGIC     "row_count > 18000"
+-- MAGIC ]
+
+-- COMMAND ----------
+
 select
   customer_id,
   timestamp(getargument("timestamp")) as timestamp,
