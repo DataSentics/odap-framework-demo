@@ -105,7 +105,7 @@ def traffic_source_medium_agg_columns(time_window: str) -> List[tw.WindowedColum
     return [
         tw.count_windowed(
             f"freq_{time_window}",
-            f.when(f.col("traffic_source_medium").isin(["organic", "cpc", "referral", "cpm", "e-mail", "paidsocial", "social", "sms", "logout_banner"]), f.col("traffic_source_medium")).otherwise("(none)"),
+            f.when(f.col("traffic_source_medium").isin(["organic", "cpc", "referral", "cpm", "e-mail", "paidsocial", "social", "sms", "logout_banner", "chatbot"]), f.col("traffic_source_medium")).otherwise("(none)"),
         ),
     ]
 
