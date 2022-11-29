@@ -9,7 +9,7 @@ from odap.feature_factory.dry_run import dry_run, create_dry_run_widgets
 
 # MAGIC %sql
 # MAGIC create widget text target default "no target";
-# MAGIC create widget text timestamp default "2021-12-12"
+# MAGIC create widget text timestamp default "2020-12-12"
 
 # COMMAND ----------
 
