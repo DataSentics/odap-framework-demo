@@ -18,7 +18,11 @@ create widget text timestamp default ""
 
 -- MAGIC %python
 -- MAGIC dq_checks = [
--- MAGIC     "row_count > 18000"
+-- MAGIC     {
+-- MAGIC         "invalid_count(customer_email) = 0": {
+-- MAGIC             "valid regex": r"^[a-zA-Z0-9.]+@[a-zA-Z0-9-.]+$"
+-- MAGIC         }
+-- MAGIC     }
 -- MAGIC ]
 
 -- COMMAND ----------
