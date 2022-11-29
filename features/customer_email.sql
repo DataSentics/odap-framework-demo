@@ -33,3 +33,9 @@ select
   customer_email
 from
   hive_metastore.odap_offline_sdm_l2.customer
+-- union (
+--   select
+--     123456789 as customer_id,
+--     timestamp(getargument("timestamp")) as timestamp,
+--     "invalid_email" as customer_email
+-- ) -- uncoment for email dq check validation fail
