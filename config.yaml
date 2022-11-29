@@ -12,9 +12,6 @@ parameters:
       customer:
         id_column: "customer_id"
         id_column_type: "long"
-      account:
-        id_column: "account_id"
-        id_column_type: "long"
   
   segmentfactory:
     log:
@@ -26,13 +23,11 @@ parameters:
       path: "dbfs:/odap_segments/segments.delta"
 
     exports:          
-      my_awesome_alert:
-        destination: main_azure_blob_export
+      customers_likely_to_submit_lead:
+        destination: "main_azure_blob_export"
         segments:
-          customer_account_investment_interest:
-            name: "Zájemci o investice"
-          customer_account_investment_interest_second:
-            name: "Lorem ipsum"  
+          customer_likely_to_submit_lead:
+            name: "Customers with high probability to submit a lead."
 
     destinations:
       main_azure_blob_export:
@@ -41,5 +36,3 @@ parameters:
         attributes:
           customer:
             - customer_email
-          account:
-            - currency

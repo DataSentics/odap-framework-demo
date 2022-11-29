@@ -1,5 +1,6 @@
 -- Databricks notebook source
-SELECT customer_id
+SELECT 
+  customer_id 
 FROM
   odap_features.features_customer
 WHERE
