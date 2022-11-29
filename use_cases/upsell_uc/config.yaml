@@ -1,0 +1,7 @@
+parameters:
+  exports:          
+    upsell_first_export:
+      destination: main_azure_blob_export
+      segments:
+        customer_account_investment_interest:
+          name: "Zájemci o investice"

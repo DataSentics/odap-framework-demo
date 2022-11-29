@@ -1,0 +1,15 @@
+parameters:
+  exports:          
+    churn_first_export:
+      destination: main_azure_blob_export
+      segments:
+        customer_account_investment_interest:
+          name: "Zájemci o investice"
+        customer_account_investment_interest_second:
+          name: "Lorem ipsum"  
+          
+    churn_second_export:
+      destination: main_azure_blob_export
+      segments:
+        customer_account_investment_interest:
+          name: "Zájemci o investice"
