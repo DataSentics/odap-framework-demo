@@ -83,7 +83,7 @@ df_qi_results = spark.createDataFrame(qi_results)
 
 # COMMAND ----------
 
-df_qi_results = spark.table("odap_datasets.qi_results").display()
+df_qi_results = spark.table("odap_datasets.qi_results")
 
 # COMMAND ----------
 
