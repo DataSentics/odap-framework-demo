@@ -4,4 +4,5 @@ SELECT
 FROM
   odap_features.features_customer
 WHERE
-  ai_lead_submit_estimation > 0.9
+  ai_lead_submit_estimation > 0.9 AND
+  customer_email IS NOT NULL
