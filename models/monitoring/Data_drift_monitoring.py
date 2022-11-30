@@ -9,8 +9,8 @@
 # MAGIC 
 # MAGIC The notebook is organized as follows:  
 # MAGIC **Setup for the notebook** = setup of the environment, import of libraries, definition of functions   
-# MAGIC **Using quick insights for detecting data drift** =  
-# MAGIC **Log results to MlFlow** =  
+# MAGIC **Using quick insights for detecting data drift** = run the script used for calculating necessary parameters  
+# MAGIC **Log results to MlFlow** = log significant differences in features to mlflow
 # MAGIC 
 # MAGIC **Goal:** At the end of the notebook, you have obtained logged siginificant feature differences in MlFlow
 # MAGIC 
@@ -31,17 +31,17 @@ token = dbutils.secrets.get(scope="key-vault", key="dbx-token")
 
 # COMMAND ----------
 
+import mlflow
 from odap.main import show
+from pyspark.sql import functions as f
 
 # COMMAND ----------
 
 res = show(
     show_display=False,
-    features_table="sb_odap_feature_store.upsell_leads_data",
+    features_table="odap_datasets.qi_upsell_leads_sample",
     segments_table="hive_metastore.odap_app_main.segments",
     destinations_table="hive_metastore.odap_app_main.destinations",
-    #data_path='["dbfs:/user/hive/warehouse/sb_odap_feature_store.db/union_data_non_delta"]',
-    #data_path='["abfss://featurestore@odapczlakeg2dev.dfs.core.windows.net/latest/client.delta"]',
     data_path='["dbfs:/tmp/sb/sb_odap_feature_store/datasets/data_for_monitoring.delta"]',
     databricks_host="https://adb-8406481409439422.2.azuredatabricks.net",
     databrics_token=str(token),
@@ -50,45 +50,18 @@ res = show(
         "/Repos/persona/skeleton-databricks/src/__myproject__/_export/p360_export"
     ),
     lib_version="0.1.3",
-    stats_table="sb_odap_feature_store.stats_with_label",
+    stats_table="odap_datasets.stats_with_label",
 )
 
 # COMMAND ----------
 
 # MAGIC %md 
-# MAGIC # How to use Quick Insights
+# MAGIC # How to use
 
 # COMMAND ----------
 
 # MAGIC %md 
-# MAGIC ## Display saved segments
-
-# COMMAND ----------
-
-conditions = spark.sql("select * from hive_metastore.odap_app_main.segments")
-display(conditions)
-
-# COMMAND ----------
-
-# MAGIC %md 
-# MAGIC ## Select target group and base
-
-# COMMAND ----------
-
-import pyspark.sql.functions as F
-base_id = "139cb633-fce9-4398-bd08-fee0d6db3bc5" # "5c062c64-9e86-40ee-be30-b9856d123b12"
-target_id = "5909a9c9-5b78-4e83-941f-e2bbc8db4c03" # "96e7e123-0a2f-4c0a-87cc-c480d6cf2e12"
-base_conds_ = (conditions
-               .filter(F.col("id")==base_id)
-              ).collect()
-target_conds_ = (conditions
-                 .filter(F.col("id")==target_id)
-                ).collect()
-
-base_conds = [item.conditions for item in base_conds_]
-target_conds = [item.conditions for item in target_conds_]
-
-conds = [base_conds[0], target_conds[0]]
+# MAGIC ## Specify conditions to set two groups for comparison
 
 # COMMAND ----------
 
@@ -97,12 +70,20 @@ conds = ['(label == 1)', '(label == 0)']
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Run quick isnights
+# MAGIC ## Run quick insights to detect data drift
 
 # COMMAND ----------
 
-res.set_condition(obs_cond=conds[0],base_cond=conds[1])
-res.get_qi()
+res.set_condition(obs_cond=conds[0],base_cond=conds[1]) 
+qi_results = res.get_qi()
+for item in qi_results:
+    item["rate"] = float(item["rate"])
+    item["distances"] = float(item["distances"])
+df_qi_results = spark.createDataFrame(qi_results)
+
+# COMMAND ----------
+
+df_qi_results = spark.table("odap_datasets.qi_results").display()
 
 # COMMAND ----------
 
@@ -117,9 +98,24 @@ mlflow.set_experiment(f'/Users/{username}/ai_probab_lead_monitoring')
 
 # COMMAND ----------
 
-# TO-DO: Logic for MlFlow logging
+dfp_qi_results_for_logging = df_qi_results.filter(
+    f.col("id").isin(
+        [
+            "web_analytics_time_on_site_avg_90d",
+            "web_analytics_mobile_user_30d",
+            "web_analytics_events_sum_change_14d_30d",
+        ]
+    )
+).toPandas()
+
+# COMMAND ----------
+
+feature_records = dfp_qi_results_for_logging.to_dict(orient="records")
+
 with mlflow.start_run():
-    mlflow.log_metrics(monitoring_metrics)
-    mlflow.log_metrics(training_metrics)
-    mlflow.log_param('Model_name', "ai_lead_estimation_prob")
-    mlflow.log_figure(fig, "confusion_matrix.png")
+    for i in range(len(dfp_qi_results_for_logging)):
+        feature_name = feature_records[i]["id"]
+
+        for key, value in feature_records[i].items():
+            if key not in ["id", "obvious", "true_rate"]:
+                mlflow.log_metric(feature_name + "_" + key, float(value))
