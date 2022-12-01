@@ -98,7 +98,7 @@ mlflow.set_experiment(f'/Users/{username}/ai_probab_lead_monitoring')
 
 # COMMAND ----------
 
-dfp_qi_results_for_logging = df_qi_results.filter(
+df_qi_results.drop("obvious", "true_rate").filter(
     f.col("id").isin(
         [
             "web_analytics_time_on_site_avg_90d",
@@ -106,16 +106,11 @@ dfp_qi_results_for_logging = df_qi_results.filter(
             "web_analytics_events_sum_change_14d_30d",
         ]
     )
-).toPandas()
+).coalesce(1).write.format("json").mode("overwrite").save(
+    "/tmp/sb/data_drift_monitoring"
+)
 
 # COMMAND ----------
 
-feature_records = dfp_qi_results_for_logging.to_dict(orient="records")
-
 with mlflow.start_run():
-    for i in range(len(dfp_qi_results_for_logging)):
-        feature_name = feature_records[i]["id"]
-
-        for key, value in feature_records[i].items():
-            if key not in ["id", "obvious", "true_rate"]:
-                mlflow.log_metric(feature_name + "_" + key, float(value))
+    mlflow.log_artifact("/dbfs/tmp/sb/data_drift_monitoring")
