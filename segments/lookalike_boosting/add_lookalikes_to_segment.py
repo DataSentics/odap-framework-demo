@@ -31,6 +31,7 @@ def get_date_parts(date_string):
 
 # COMMAND ----------
 
+dbutils.widgets.text("entity_id_column_name", "customer_id")
 dbutils.widgets.text("entity_name", "customer")
 dbutils.widgets.text("latest_date", "2022-09-30")
 dbutils.widgets.text("segment_name", "customers_likely_to_churn")
@@ -50,4 +51,10 @@ df_data = spark.table(f"odap_features.features_{dbutils.widgets.get('entity_name
 # COMMAND ----------
 
 # DBTITLE 1,Create model dataset
-df_data.withColumn("label", "FILL_IN")
+df_model_dataset = df_data.join(
+    df_to_enrich, on=dbutils.widgets.get("entity_id_column_name"), how="inner"
+).withColumn("label", f.lit(1)).union(
+    df_data.join(
+        df_to_enrich, on=dbutils.widgets.get("entity_id_column_name"), how="anti"
+    ).withColumn("label", f.lit(0))
+)
