@@ -5,12 +5,12 @@ from pyspark.sql import SparkSession, DataFrame, functions as f
 
 def export(export_name: str, segment_df: DataFrame, export_config: Dict, destination_config: Dict):
     """Simple exporter example
-    Export DF as CSV to blob storage.
+    Export DF as CSV to storage.
 
     Parameters
     ----------
-    segment : str
-        The name of the exported segment
+    export_name : str
+        The name of the export
     segment_df : DataFrame
         Segment dataframe
     segment_config : Dict
@@ -22,10 +22,10 @@ def export(export_name: str, segment_df: DataFrame, export_config: Dict, destina
     spark = SparkSession.getActiveSession()
     
     output_path = destination_config["path"]
-    output_blob_path = f"/dbfs/fake_azure_blob{output_path}/{export_name}.csv"
+    output_blob_path = f"/dbfs/odap_exports/{output_path}/{export_name}.csv"
 
     os.makedirs(os.path.dirname(output_blob_path), exist_ok=True)
-
+    
     segments_config = export_config["segments"]
 
     names_dictionary_df = spark.createDataFrame(

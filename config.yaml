@@ -25,39 +25,22 @@ parameters:
       table: "odap_segments.segments"
       path: "dbfs:/odap_segments/segments.delta"
 
-    exports:
-      my_awesome_alert:
-        destination: main_azure_blob_export
-        schedule:
-          quartz_cron_expression: "34 38 18 * * ?"
-          timezone_id: "UTC"
-          pause_status: "UNPAUSED"
-        segments:
-          customer_account_investment_interest:
-            name: "Zájemci o investice"
-          customer_account_investment_interest_second:
-            name: "Lorem ipsum"
-      my_awesome_alert_5:
-        destination: main_azure_blob_export
-        schedule:
-          quartz_cron_expression: "34 38 18 * * ?"
-          timezone_id: "UTC"
-          pause_status: "UNPAUSED"
-        segments:
-          customer_account_investment_interest:
-            name: "Zájemci o investice"
-          customer_account_investment_interest_second:
-            name: "Lorem ipsum"
-
     destinations:
-      main_azure_blob_export:
-        type: azure_blob
-        path: /exports/segments
+      email_currency_csv_dbfs_export:
+        type: "csv_dbfs"
+        path: "use_cases"
         attributes:
           customer:
-            - customer_email
+            - "customer_email"
           account:
             - currency
+
+      email_csv_dbfs_export:
+        type: "csv_dbfs"
+        path: "use_cases"
+        attributes:
+          customer:
+            - "customer_email"
 
 execution:
   job_tag: test
@@ -69,3 +52,4 @@ execution:
     data_security_mode: "NONE"
     runtime_engine: "STANDARD"
     num_workers: 1
+      - "currency"
