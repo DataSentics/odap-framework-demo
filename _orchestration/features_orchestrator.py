@@ -3,7 +3,7 @@
 
 # COMMAND ----------
 
-from odap.feature_factory.dry_run import create_dry_run_widgets
+from odap.feature_factory.widgets import create_notebooks_widget
 
 # COMMAND ----------
 
@@ -13,7 +13,7 @@ from odap.feature_factory.dry_run import create_dry_run_widgets
 
 # COMMAND ----------
 
-create_dry_run_widgets()
+create_notebooks_widget()
 
 # COMMAND ----------
 
