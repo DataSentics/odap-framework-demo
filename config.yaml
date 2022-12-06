@@ -52,4 +52,3 @@ execution:
     data_security_mode: "NONE"
     runtime_engine: "STANDARD"
     num_workers: 1
-      - "currency"
