@@ -1,0 +1,2 @@
+odap==0.0.12
+# soda-core-spark-df==3.0.14

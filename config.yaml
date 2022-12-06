@@ -41,14 +41,3 @@ parameters:
         attributes:
           customer:
             - "customer_email"
-
-execution:
-  job_tag: test
-  cluster:
-    spark_version: "10.4.x-scala2.12"
-    custom_tags:
-      PxPorpuse: "ExportImport"
-    node_type_id: "Standard_D4ds_v4"
-    data_security_mode: "NONE"
-    runtime_engine: "STANDARD"
-    num_workers: 1
