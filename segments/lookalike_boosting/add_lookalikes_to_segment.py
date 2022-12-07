@@ -58,3 +58,36 @@ df_model_dataset = df_data.join(
         df_to_enrich, on=dbutils.widgets.get("entity_id_column_name"), how="anti"
     ).withColumn("label", f.lit(0))
 )
+
+# COMMAND ----------
+
+# DBTITLE 1,Load model pipeline for lookalike estimation
+#mlflow destination
+
+# COMMAND ----------
+
+# DBTITLE 1,Create lookalike list
+
+
+# COMMAND ----------
+
+# DBTITLE 1,Take chosen count of lookalikes
+
+
+# COMMAND ----------
+
+# DBTITLE 1,Union with existing segment
+# HOW TO ENSURE THAT WE CAN RECOGNIZE THIS? OR SAVE IT AS NEW SEGMENT_NAME WITH + "_BOOSTED"
+
+# COMMAND ----------
+
+#normalization ["Normalizer", "StandardScaler", "MinMaxScaler"]
+
+#model, model_approach (hyperopt and models), hyperopt metric ["f1", "lift_10", "lift_100", "r2", "rmse", "weighted_precision", "weighted_recall"]
+
+#downsampling
+#upsampling
+#downsample_share
+#target_ratio
+
+#choice of features
