@@ -82,7 +82,9 @@ environments:
                 export: "upsell_uc: upsell_uc_loan_interest"
 
       - name: "integration-test"
-        git_source: *odap-git-source
+        git_source:
+          <<: *odap-git-source
+          git_branch: "{{env['GITHUB_HEAD_REF']}}"
         job_clusters:
           - job_cluster_key: "default"
             <<: *basic-static-cluster
