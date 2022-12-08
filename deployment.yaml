@@ -36,7 +36,7 @@ environments:
               no_package: true
             job_cluster_key: "default"
             notebook_task:
-              notebook_path: "_orchestration/features_orchestrator"
+              notebook_path: "orchestration/features_orchestrator"
               base_parameters:
                 target: "no target"
                 timestamp: "{{start_date}}"
@@ -57,7 +57,7 @@ environments:
               no_package: true
             job_cluster_key: "default"
             notebook_task:
-              notebook_path: "_orchestration/segments_orchestrator"
+              notebook_path: "orchestration/segments_orchestrator"
               base_parameters:
                 export: "upsell_uc: upsell_uc_investment_interest"
 
@@ -77,7 +77,7 @@ environments:
               no_package: true
             job_cluster_key: "default"
             notebook_task:
-              notebook_path: "_orchestration/segments_orchestrator"
+              notebook_path: "orchestration/segments_orchestrator"
               base_parameters:
                 export: "upsell_uc: upsell_uc_loan_interest"
 
