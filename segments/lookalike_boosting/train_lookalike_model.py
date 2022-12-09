@@ -3,6 +3,7 @@
 
 # COMMAND ----------
 
+import datetime as dt
 from hyperopt import hp
 from hyperopt.pyll import scope
 import json
@@ -37,14 +38,23 @@ import shap
 
 # COMMAND ----------
 
+# MAGIC %md ##Functions
+
+# COMMAND ----------
+
+def get_date_parts(date_string):
+    return [int(date_part) for date_part in date_string.split("-")]
+
+# COMMAND ----------
+
 # MAGIC %md ##Widgets
 
 # COMMAND ----------
 
+dbutils.widgets.text("entity_id_column_name", "")
 dbutils.widgets.dropdown("model_approach", "hyperopt", ["basic", "hyperopt"])
 dbutils.widgets.dropdown("hyperopt_metric", "lift_10", ["f1", "lift_10", "lift_100", "r2", "rmse", "weighted_precision", "weighted_recall"])
 dbutils.widgets.dropdown("downsample",  "Yes", ["Yes", "No"])
-dbutils.widgets.text("downsample_share", "0.3")
 dbutils.widgets.text("target_ratio", "0.125")
 dbutils.widgets.dropdown("upsample", "Yes", ["Yes", "No"])
 dbutils.widgets.dropdown("normalize", "No", ["Yes", "No"])
@@ -56,7 +66,72 @@ dbutils.widgets.dropdown("normalize_approach", "StandardScaler", ["Normalizer", 
 
 # COMMAND ----------
 
-df_data = spark.table("odap_features.features_customer")
+test_data = True
+
+# COMMAND ----------
+
+if test_data:
+    import pyspark.sql.types as t
+
+    timestamp = dt.datetime(2022, 9, 30)
+
+    schema = t.StructType(
+        [
+            t.StructField("customer_id", t.StringType(), True),
+            t.StructField("timestamp", t.TimestampType(), True),
+            t.StructField("age", t.IntegerType(), True),
+            t.StructField("gender", t.IntegerType(), True),
+        ]
+    )
+
+    df_data = spark.createDataFrame(
+        [
+        ("1", timestamp, 43, 1), 
+        ("2", timestamp, 32, 0),
+        ("3", timestamp, 26, 1), 
+        ("4", timestamp, 22, 1),
+        ("5", timestamp, 54, 0), 
+        ("6", timestamp, 43, 1),
+        ("7", timestamp, 31, 0), 
+        ("8", timestamp, 29, 1),
+        ("9", timestamp, 20, 0), 
+        ("10", timestamp, 56, 0),
+        ], 
+        schema
+    )
+
+    schema_segments = t.StructType(
+        [
+            t.StructField("export_id", t.StringType(), True),
+            t.StructField("segment", t.StringType(), True),
+            t.StructField("customer_id", t.StringType(), True),
+        ]
+    )
+
+    df_to_enrich = spark.createDataFrame(
+        [
+        ("xesfoij", "test_segment", "1"),
+        ("xesfoij", "test_segment", "4"),
+        ("xesfoij", "test_segment", "6"),
+        ("xesfoij", "test_segment", "8"),
+        ("xesfoij", "test_segment", "10")
+        ],
+        schema_segments
+    ).select(dbutils.widgets.get("entity_id_column_name"))
+
+else:
+    latest_year, latest_month, latest_day = get_date_parts(dbutils.widgets.get("latest_date"))
+    df_data = spark.table(f"odap_features.features_{dbutils.widgets.get('entity_name')}").filter(f.col("timestamp") == dt.date(latest_year, latest_month, latest_day))
+    df_to_enrich = spark.table("odap_segments.segments").select(dbutils.widgets.get("entity_id_column_name")).filter(f.col("segment") == dbutils.widgets.get("segment_name"))
+
+
+df_model_dataset = df_data.join(
+df_to_enrich, on=dbutils.widgets.get("entity_id_column_name"), how="inner"
+).withColumn("label", f.lit(1)).union(
+df_data.join(
+    df_to_enrich, on=dbutils.widgets.get("entity_id_column_name"), how="anti"
+).withColumn("label", f.lit(0))
+)      
 
 # COMMAND ----------
 
@@ -68,8 +143,11 @@ df_metadata = spark.table("odap_features.metadata_customer")
 
 # COMMAND ----------
 
-feature_names = [feature[0] for feature in df_metadata.select("feature").collect()]
-feature_names.remove("customer_email")
+if test_data:
+    features_names = ["age", "gender"]
+else:
+    features_names = [feature[0] for feature in df_metadata.select("feature").collect()]
+    features_names.remove("customer_email")
 
 # COMMAND ----------
 
@@ -78,42 +156,58 @@ feature_names.remove("customer_email")
 # COMMAND ----------
 
 assembler = VectorAssembler(inputCols=features_names, outputCol="features", handleInvalid="skip")
-df_data = assembler.transform(df).select('label', 'features')
+df_model_dataset = assembler.transform(df_model_dataset).select('label', 'features')
 
 # COMMAND ----------
 
-# MAGIC %md #### Split, downsample, scale, normalize
+# MAGIC %md #### Features preprocessing - downsample, split, scale, normalize
 
 # COMMAND ----------
 
-#split data to test and train
-# if downsample, then downsample
+# DBTITLE 1,Downsampling
+if (dbutils.widgets.get("downsample") == "Yes"):
+    target_ratio = dbutils.widgets.get("target_ratio")
+    data_target = df_model_dataset.filter(f.col('label') == 1)
+    data_non_target = df_model_dataset.filter(f.col('label') == 0)
 
-#if normalize, then normalize and choose normalize approach
-    if normalize == "Yes":
-        scaler_norm = Normalizer(inputCol="features_raw", outputCol="features", p=1.0)
-        scaler_stan = StandardScaler(inputCol="features_raw", outputCol="features", withStd=True, withMean=False)
-        scaler_mm = MinMaxScaler(inputCol="features_raw", outputCol="features")
-        
-        df_train = df_train.withColumnRenamed("features", "features_raw")
-        df_test = df_test.withColumnRenamed("features", "features_raw")
-        
-        if normalize_approach == "Normalizer":
-            df_train = scaler_norm.transform(df_train).drop("features_raw")
-            df_test = scaler_norm.transform(df_test).drop("features_raw")
-            scaler = scaler_norm
-        elif normalize_approach == "MinMaxScaler":
-            scaler_stan = scaler_stan.fit(df_train)
-            df_train = scaler_stan.transform(df_train).drop("features_raw")
-            df_test = scaler_stan.transform(df_test).drop("features_raw")
-            scaler = scaler_stan
-        else:
-            scaler_mm = scaler_mm.fit(df_train)
-            df_train = scaler_mm.transform(df_train).drop("features_raw")
-            df_test = scaler_mm.transform(df_test).drop("features_raw")
-            scaler = scaler_mm
+    data_non_target_count_wanted = (data_target.count() / float(target_ratio)) - data_target.count()
+
+    downsample_fraction = data_non_target_count_wanted / data_non_target.count()
+
+    df_model_dataset = data_target.union(data_non_target.sample(fraction=downsample_fraction, seed=42))
+
+# COMMAND ----------
+
+# DBTITLE 1,Split data
+df_train, df_test = df_model_dataset.randomSplit([0.8, 0.2], seed=42)
+
+# COMMAND ----------
+
+# DBTITLE 1,Normalization
+if dbutils.widgets.get("normalize") == "Yes":
+    scaler_norm = Normalizer(inputCol="features_raw", outputCol="features", p=1.0)
+    scaler_stan = StandardScaler(inputCol="features_raw", outputCol="features", withStd=True, withMean=False)
+    scaler_mm = MinMaxScaler(inputCol="features_raw", outputCol="features")
+    
+    df_train = df_train.withColumnRenamed("features", "features_raw")
+    df_test = df_test.withColumnRenamed("features", "features_raw")
+    
+    if dbutils.widgets.get("normalize_approach") == "Normalizer":
+        df_train = scaler_norm.transform(df_train).drop("features_raw")
+        df_test = scaler_norm.transform(df_test).drop("features_raw")
+        scaler = scaler_norm
+    elif dbutils.widgets.get("normalize_approach") == "MinMaxScaler":
+        scaler_stan = scaler_stan.fit(df_train)
+        df_train = scaler_stan.transform(df_train).drop("features_raw")
+        df_test = scaler_stan.transform(df_test).drop("features_raw")
+        scaler = scaler_stan
     else:
-        scaler = None    
+        scaler_mm = scaler_mm.fit(df_train)
+        df_train = scaler_mm.transform(df_train).drop("features_raw")
+        df_test = scaler_mm.transform(df_test).drop("features_raw")
+        scaler = scaler_mm
+else:
+    scaler = None    
 
 # COMMAND ----------
 
