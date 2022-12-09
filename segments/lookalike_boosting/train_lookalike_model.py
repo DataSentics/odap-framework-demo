@@ -3,11 +3,15 @@
 
 # COMMAND ----------
 
-from pyspark.sql.dataframe import DataFrame
-import pyspark.sql.functions as f
+from hyperopt import hp
+from hyperopt.pyll import scope
+import json
+import math
+import mlflow
+import mlflow.spark as mlflow_spark
+from mlflow.tracking.client import MlflowClient
+import plotly.express as px
 from pyspark.ml import Pipeline, PipelineModel
-#from pyspark.sql.session import SparkSession
-from pyspark.ml.evaluation import BinaryClassificationEvaluator, RegressionEvaluator
 from pyspark.ml.classification import (
     LogisticRegression,
     GBTClassifier,
@@ -17,30 +21,19 @@ from pyspark.ml.classification import (
     LinearSVC,
     NaiveBayes,
 )
-import mlflow
-import mlflow.spark as mlflow_spark
-from mlflow.tracking.client import MlflowClient
-from pyspark.ml.feature import VectorAssembler
-
-import plotly.express as px
-
-#from datasciencefunctions.supervised import fit_supervised_model #remove
-
-from hyperopt import hp
-from hyperopt.pyll import scope
-from pprint import pprint
-import math
-from pyspark.ml.evaluation import MulticlassClassificationEvaluator, BinaryClassificationEvaluator
-from pyspark.mllib.evaluation import MulticlassMetrics
-from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
-import json
-import shap
+from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator, RegressionEvaluator
+from pyspark.ml.feature import VectorAssembler, Normalizer, StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
 from pyspark.ml.functions import vector_to_array
+from pyspark.ml.tuning import CrossValidator, ParamGridBuilder
+from pyspark.mllib.evaluation import MulticlassMetrics
 from pyspark.mllib.util import MLUtils
-from pyspark.ml.feature import Normalizer, StandardScaler, MinMaxScaler, MaxAbsScaler, RobustScaler
-
+from pyspark.sql.dataframe import DataFrame
+import pyspark.sql.functions as f
 from segments.lookalike_boosting.ml_functions import lift_curve_colname_specified, ith, process_multiple_segments_input, compute_lift_train_test
+import shap
 
+#from pyspark.sql.session import SparkSession
+#from datasciencefunctions.supervised import fit_supervised_model #remove
 
 # COMMAND ----------
 
