@@ -29,7 +29,7 @@ create widget text timestamp default ""
 
 select
   customer_id,
-  timestamp(getargument("timestamp")) as timestamp,
+  timestamp(getargument("timestam")) as timestamp,
   customer_email
 from
   hive_metastore.odap_offline_sdm_l2.customer
