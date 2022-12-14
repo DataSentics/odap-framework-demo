@@ -412,54 +412,59 @@ except BaseException as e:
 
 # COMMAND ----------
 
-def get_feature_importance(model_obj=modeling.result['model_obj'], model_approach=dp.get_widget_value("model_approach"), feature_columns=get_features_names.result):
-    try:
-        if model_approach == 'basic':
-            model_obj = model_obj.stages[0]
-        else:
-            model_obj
-                     
-        feature_importances = list(model_obj.featureImportances.toArray())
-        feature_importances_with_names = []
+model_obj = model_pipeline_all
+model_approach = dbutils.widgets.get("model_approach")
+feature_columns = features_names
 
-        for feature_name, importance in zip(feature_columns, feature_importances):
-            feature_importances_with_names.append((feature_name, float(importance)))
+# COMMAND ----------
 
-        feature_importances = spark.createDataFrame(feature_importances_with_names, schema="`feature` STRING, `importance` FLOAT") 
-        feature_importances = feature_importances.orderBy("importance")
+try:
+    if model_approach == 'basic':
+        model_obj_fi = model_pipeline_all.stages[-1].stages[-1]
+    else:
+        model_obj_fi
+                    
+    feature_importances = list(model_obj_fi.featureImportances.toArray())
+    feature_importances_with_names = []
 
-        importance_min = feature_importances.select('importance').groupBy().agg(f.min('importance')).collect()[0][0]
-        importance_max = feature_importances.select('importance').groupBy().agg(f.max('importance')).collect()[0][0]
+    for feature_name, importance in zip(feature_columns, feature_importances):
+        feature_importances_with_names.append((feature_name, float(importance)))
 
-        if importance_min < 0:
-            color_schema = "greenred"
-        else:
-            color_schema = "rdylgn"
-        
-        feature_importances = feature_importances.withColumn('feature',  f.regexp_replace('feature', '_', ' '))
-        feature_importances = feature_importances.filter(f.col('importance') > 0)
-        
-        fig = px.bar(feature_importances.orderBy("importance", ascending=False).limit(30).orderBy("importance").toPandas(), x="feature", y="importance",
-                         hover_data=["feature", "importance"], color="importance",
-                         color_continuous_scale=color_schema,
-                         height=700)
-        fig.show()
-        
-        # top 15
-        fig = px.bar(feature_importances.orderBy("importance").limit(15).toPandas(), x="feature", y="importance",
-                     hover_data=["feature", "importance"], color="importance",
-                     color_continuous_scale=color_schema, range_color=[importance_min, importance_max],
-                     height=700,)
-        fig.show()
-        
-        # min 15
-        fig = px.bar(feature_importances.orderBy("importance", ascending=False).limit(15).orderBy("importance").toPandas(), x="feature", y="importance",
-                     hover_data=["feature", "importance"], color="importance",
-                     color_continuous_scale=color_schema, range_color=[importance_min, importance_max],
-                     height=700, )
-        fig.show()
-    except BaseException as e:
-        print(f"ERROR: features importances not available: {e}")
+    feature_importances = spark.createDataFrame(feature_importances_with_names, schema="`feature` STRING, `importance` FLOAT") 
+    feature_importances = feature_importances.orderBy("importance")
+
+    importance_min = feature_importances.select('importance').groupBy().agg(f.min('importance')).collect()[0][0]
+    importance_max = feature_importances.select('importance').groupBy().agg(f.max('importance')).collect()[0][0]
+
+    if importance_min < 0:
+        color_schema = "greenred"
+    else:
+        color_schema = "rdylgn"
+    
+    feature_importances = feature_importances.withColumn('feature',  f.regexp_replace('feature', '_', ' '))
+    feature_importances = feature_importances.filter(f.col('importance') > 0)
+    
+    fig = px.bar(feature_importances.orderBy("importance", ascending=False).limit(30).orderBy("importance").toPandas(), x="feature", y="importance",
+                        hover_data=["feature", "importance"], color="importance",
+                        color_continuous_scale=color_schema,
+                        height=700)
+    fig.show()
+    
+    # top 15
+    fig = px.bar(feature_importances.orderBy("importance").limit(15).toPandas(), x="feature", y="importance",
+                    hover_data=["feature", "importance"], color="importance",
+                    color_continuous_scale=color_schema, range_color=[importance_min, importance_max],
+                    height=700,)
+    fig.show()
+    
+    # min 15
+    fig = px.bar(feature_importances.orderBy("importance", ascending=False).limit(15).orderBy("importance").toPandas(), x="feature", y="importance",
+                    hover_data=["feature", "importance"], color="importance",
+                    color_continuous_scale=color_schema, range_color=[importance_min, importance_max],
+                    height=700, )
+    fig.show()
+except BaseException as e:
+    print(f"ERROR: features importances not available: {e}")
 
 # COMMAND ----------
 
@@ -468,71 +473,84 @@ def get_feature_importance(model_obj=modeling.result['model_obj'], model_approac
 
 # COMMAND ----------
 
-def features_values(df=modeling.result['train'], feature_columns=get_features_names.result,, model_obj=modeling.result['model_obj'], prob_th=0.5):
-    try:
-        df = (df
-              .withColumn("xs", vector_to_array("features"))
-              .select(["label", "score2"] + [f.col("xs")[i].alias(name) for i, name in enumerate(feature_columns)])
-              .withColumn("TARGET_PRED", f.when(f.col("score2") >= prob_th, 1).otherwise(0))
-             )
-        
-        df_target = (df
-                     .groupBy("label")
-                     .agg(
-                         f.count(f.lit(1)).alias('count'),
-                         *[f.mean(f.col(c)).alias(c) for c in feature_columns]
-                     )
-                     .sort('label')
-                    )
-        
-        df_pred = (df
-                   .groupBy("TARGET_PRED")
-                   .agg(
-                       f.count(f.lit(1)).alias('count'),
-                       *[f.mean(f.col(c)).alias(c) for c in feature_columns]
-                   )
-                   .sort("TARGET_PRED")
-                  )
-        
-        display(df_target)
-        display(df_pred)
-        
-    except BaseException as e:
-         print(f'ERROR: {e}')
+df = score_df_train
+model_obj = model_pipeline_all
+feature_columns = features_names
+prob_th = 0.5
 
 # COMMAND ----------
 
-def features_values_test(df=modeling.result['test'], feature_columns=get_features_names.result, model_obj=modeling.result['model_obj'], prob_th=0.5):
-    try:
-        df = (df
-              .withColumn("xs", vector_to_array("features"))
-              .select(["label", "score2"] + [f.col("xs")[i].alias(name) for i, name in enumerate(feature_columns)])
-              .withColumn("TARGET_PRED", f.when(f.col("score2") >= prob_th, 1).otherwise(0))
-             )
-        
-        df_target = (df
-                     .groupBy("label")
-                     .agg(
-                         f.count(f.lit(1)).alias('count'),
-                         *[f.mean(f.col(c)).alias(c) for c in feature_columns]
-                     )
-                     .sort('label')
+try:
+    df = (df
+            .withColumn("xs", vector_to_array("features"))
+            .select(["label", "score2"] + [f.col("xs")[i].alias(name) for i, name in enumerate(feature_columns)])
+            .withColumn("TARGET_PRED", f.when(f.col("score2") >= prob_th, 1).otherwise(0))
+            )
+    
+    df_target = (df
+                    .groupBy("label")
+                    .agg(
+                        f.count(f.lit(1)).alias('count'),
+                        *[f.mean(f.col(c)).alias(c) for c in feature_columns]
                     )
-        
-        df_pred = (df
-                   .groupBy("TARGET_PRED")
-                   .agg(
-                       f.count(f.lit(1)).alias('count'),
-                       *[f.mean(f.col(c)).alias(c) for c in feature_columns]
-                   )
-                   .sort("TARGET_PRED")
-                  )
-        
-        display(df_target)
-        display(df_pred)
-        
-    except BaseException as e:
-         print(f'ERROR: {e}')
+                    .sort('label')
+                )
+    
+    df_pred = (df
+                .groupBy("TARGET_PRED")
+                .agg(
+                    f.count(f.lit(1)).alias('count'),
+                    *[f.mean(f.col(c)).alias(c) for c in feature_columns]
+                )
+                .sort("TARGET_PRED")
+                )
+    
+    display(df_target)
+    display(df_pred)
+    
+except BaseException as e:
+    
+        print(f'ERROR: {e}')
+
+# COMMAND ----------
+
+df = score_df
+model_obj = model_pipeline_all
+feature_columns = features_names
+prob_th = 0.5
+
+# COMMAND ----------
+
+try:
+    df = (df
+            .withColumn("xs", vector_to_array("features"))
+            .select(["label", "score2"] + [f.col("xs")[i].alias(name) for i, name in enumerate(feature_columns)])
+            .withColumn("TARGET_PRED", f.when(f.col("score2") >= prob_th, 1).otherwise(0))
+            )
+    
+    df_target = (df
+                    .groupBy("label")
+                    .agg(
+                        f.count(f.lit(1)).alias('count'),
+                        *[f.mean(f.col(c)).alias(c) for c in feature_columns]
+                    )
+                    .sort('label')
+                )
+    
+    df_pred = (df
+                .groupBy("TARGET_PRED")
+                .agg(
+                    f.count(f.lit(1)).alias('count'),
+                    *[f.mean(f.col(c)).alias(c) for c in feature_columns]
+                )
+                .sort("TARGET_PRED")
+                )
+    
+    display(df_target)
+    display(df_pred)
+    
+except BaseException as e:
+        print(f'ERROR: {e}')
 
 # COMMAND ----------
 
@@ -541,20 +559,25 @@ def features_values_test(df=modeling.result['test'], feature_columns=get_feature
 
 # COMMAND ----------
 
-def shapley_vals(df=modeling.result['train'], feature_columns=get_features_names.result, model_obj=modeling.result['model_obj']):
-    try:
-        df = (df
-              .withColumn("xs", vector_to_array("features"))
-              .select(["label"] + [f.col("xs")[i].alias(name) for i, name in enumerate(feature_columns)])
-             )
-        
-        X = df.select(feature_columns).toPandas()
-        explainer = shap.TreeExplainer(model_obj)
-        shap_values = explainer.shap_values(X, check_additivity=False)
-        
-        shap.summary_plot(shap_values, X, plot_size=[30,20])
-        shap.summary_plot(shap_values, X, plot_type='violin', plot_size=[30,20])
-        shap.summary_plot(shap_values, X, plot_type="bar")
-        
-    except BaseException as e:
-            print(f'ERROR: Shapley values not available: {e}')
+df = score_df_train
+model_obj = model_pipeline_all
+feature_columns = features_names
+
+# COMMAND ----------
+
+try:
+    df = (df
+            .withColumn("xs", vector_to_array("features"))
+            .select(["label"] + [f.col("xs")[i].alias(name) for i, name in enumerate(feature_columns)])
+            )
+    
+    X = df.select(feature_columns).toPandas()
+    explainer = shap.TreeExplainer(model_obj.stages[-1])
+    shap_values = explainer.shap_values(X, check_additivity=False)
+    
+    shap.summary_plot(shap_values, X, plot_size=[30,20])
+    shap.summary_plot(shap_values, X, plot_type='violin', plot_size=[30,20])
+    shap.summary_plot(shap_values, X, plot_type="bar")
+    
+except BaseException as e:
+        print(f'ERROR: Shapley values not available: {e}')
