@@ -1,5 +1,4 @@
 # Databricks notebook source
-# Databricks notebook source	
 # MAGIC %md Steps
 # MAGIC - load the segment you need to enrich
 # MAGIC - turn the segment into the target
@@ -17,7 +16,58 @@
 # COMMAND ----------
 
 import datetime as dt
+import ipywidgets as widgets
 from pyspark.sql import functions as f
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Create widgets
+
+# COMMAND ----------
+
+criterion_choice = widgets.RadioButtons(
+    options=['probability_threshold', 'lookalike_ids_count'],
+    disabled=False,
+    description="Filter criterion"
+)
+
+# COMMAND ----------
+
+count_lookalikes_slider = widgets.IntSlider(min=100, max=100000, step=100, value=5000)
+
+# COMMAND ----------
+
+probability_slider = widgets.FloatSlider(max=1.0, min=0.0,  step=0.01, value=0.5)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ## Use widgets to chose values for lookalike segment definition
+
+# COMMAND ----------
+
+probability_slider
+
+# COMMAND ----------
+
+probability_slider.value
+
+# COMMAND ----------
+
+count_lookalikes_slider
+
+# COMMAND ----------
+
+count_lookalikes_slider.value
+
+# COMMAND ----------
+
+criterion_choice
+
+# COMMAND ----------
+
+criterion_choice.value
 
 # COMMAND ----------
 
