@@ -1,7 +1,52 @@
+import datetime as dt
 from pyspark.sql.functions import udf
 import pyspark.sql.functions as F
+from pyspark.sql import SparkSession
 import pyspark.sql.types as T
 from pyspark.sql.window import Window
+import random
+
+def generate_dummy_data():
+    
+    spark = SparkSession.builder.appName('generate_dummy_data').getOrCreate()
+    
+    timestamp = dt.datetime(2022, 9, 30)
+
+    schema = T.StructType(
+        [
+            T.StructField("customer_id", T.StringType(), True),
+            T.StructField("timestamp", T.TimestampType(), True),
+            T.StructField("age", T.IntegerType(), True),
+            T.StructField("gender", T.IntegerType(), True),
+        ]
+    )
+
+    df_data = spark.createDataFrame(
+        [
+        (i, timestamp, random.randint(20, 60), i%2) for i in range(100)
+        ], 
+        schema
+    )
+
+    schema_segments = T.StructType(
+        [
+            T.StructField("export_id", T.StringType(), True),
+            T.StructField("segment", T.StringType(), True),
+            T.StructField("customer_id", T.StringType(), True),
+        ]
+    )
+
+    df_to_enrich = spark.createDataFrame(
+        [
+        ("xesfoij", "test_segment", i*2) for i in range(30)
+        ],
+        schema_segments
+    ).select("customer_id")
+
+    df_model_dataset = df_data.join(df_to_enrich, on="customer_id", how="inner").withColumn("label", F.lit(1)).union(
+                            df_data.join(df_to_enrich, on="customer_id", how="anti").withColumn("label", F.lit(0)))
+    
+    return df_model_dataset
 
 # LIFT
 def lift_curve(predictions, target, bin_count):
