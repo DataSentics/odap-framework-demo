@@ -126,7 +126,7 @@ df_train, df_test = df_model_dataset.randomSplit([0.8, 0.2], seed=42)
 
 # COMMAND ----------
 
-# MAGIC %md ## Features preprocessing - downsample, split, scale, normalize
+# MAGIC %md ## Features preprocessing - split, scale, normalize
 
 # COMMAND ----------
 
