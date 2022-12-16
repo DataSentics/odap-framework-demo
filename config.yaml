@@ -15,7 +15,11 @@ parameters:
       account:
         id_column: "account_id"
         id_column_type: "long"
-
+  
+  p360_export:
+    config:
+      dbutils_secrets_scope: "unit-kv"
+  
   segmentfactory:
     log:
       table: "odap_segments.export_logs"
@@ -41,3 +45,34 @@ parameters:
         attributes:
           customer:
             - "customer_email"
+
+      sfmc_export:
+        type: "p360_export"
+        p360_destination: "sfmc"
+        mapping: 
+          subscriber_key: "customer_email"
+        credentials:
+          client_id: "efkwk3u07xl83ftdsuu0mo1m"
+          client_secret_key: "jv-sfmc-client-secret"
+          ftp_username: "510003196_5"
+          ftp_password_key: "jv-sfmc-ftp-password"
+          tenant_url: "mcvgt52qhm-lj19fv4nfmrv6pdn1"
+          account_id: "510003196"
+          file_location: "jv-demo"
+        attributes:
+          customer:
+             - "customer_email"
+          account:
+            - currency
+
+      fb_export:
+        type: "p360_export"
+        p360_destination: "facebook"
+        mapping: 
+          email: "customer_email"
+        credentials:
+          access_token_key: "jv-fb-access-token"
+          ad_account_id: "act_383271040067293"
+        attributes:
+          customer:
+             - "customer_email"
