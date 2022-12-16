@@ -3,13 +3,17 @@ import enum
 import hashlib
 from typing import Dict
 from pyspark.sql import DataFrame
-from p360_export.ExportRunner import odap_export
 from odap.common.config import get_config_namespace
 
 class ConfigNamespace(enum.Enum):
     P360_EXPORT = "p360_export"
 
 def export(export_name: str, segment_df: DataFrame, export_config: Dict, destination_config: Dict):
+    try:
+        from p360_export.ExportRunner import odap_export
+    except ModuleNotFoundError:
+        raise Exception("Module 'p360_export' not installed! To use p360_export add 'p360_export' to requirements.txt")
+
     entities = destination_config.get('attributes')
 
     export_columns = [attr for attrs in entities.values() for attr in attrs]
