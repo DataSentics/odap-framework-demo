@@ -1,7 +1,5 @@
 import datetime as dt
 import json
-from mlflow.tracking.artifact_utils import _download_artifact_from_uri
-from mlflow.store.artifact.runs_artifact_repo import RunsArtifactRepository
 import os
 from pyspark.sql.functions import udf
 import pyspark.sql.functions as F
@@ -9,33 +7,7 @@ from pyspark.sql import SparkSession
 import pyspark.sql.types as T
 from pyspark.sql.window import Window
 import random
-import tempfile
-    
-def get_artifact_json_from_mlflow(logged_model_path):
-    artifact_uri = "/".join(RunsArtifactRepository.get_underlying_uri(logged_model_path).split("/")[:-1]) + "/coefficients.json"
-    print(artifact_uri)
-    """
-    Imports a json artifact from a logged MLFlow experiment as a python dictionary.
-    :param artifact_uri: a URI with a path to the artifact
-        can be found in the MLFlow experiment in DBX when clicking at the desired
-        artifact under "Full Path"
-     :return artifact_dict: dictionary with the content of the json artifact
-    EXAMPLE:
-    artifact_uri = "dbfs:/databricks/mlflow-tracking/271385/1b6cwefef4/artifacts/coefficients.json"
-    get_artifact_json_from_mlflow(artifact_uri)
-    """
-    
-    filename = artifact_uri.split("/")[-1]
-
-    with tempfile.TemporaryDirectory(dir="/local_disk0/tmp",
-                                     prefix="artifact-json") as tmpdir:
-        _download_artifact_from_uri(artifact_uri, tmpdir)
-        with open(os.path.join(tmpdir, filename)) as f:
-            artifact_dict = json.load(f)
-
-    return artifact_dict
-
-
+import tempfile    
 
 def generate_dummy_data():
     

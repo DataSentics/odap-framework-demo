@@ -10,7 +10,6 @@ import mlflow
 from pyspark.ml.functions import vector_to_array
 from pyspark.ml.pipeline import PipelineModel
 from pyspark.sql import DataFrame, functions as f
-from segments.lookalike_boosting.ml_functions import get_artifact_json_from_mlflow
 
 # COMMAND ----------
 
@@ -117,10 +116,10 @@ df_inference_dataset = df_data.join(
 
 # DBTITLE 1,Load model pipeline for lookalike estimation
 model = mlflow.spark.load_model(dbutils.widgets.get("model_uri"))
+run_id = dbutils.widgets.get("model_uri").split(/)[1]
 
-features = ["web_analytics_traffic_medium_most_common_90d", "web_analytics_loan_visits_count_30d", "web_analytics_time_on_site_avg_90d"]
-#je potrebné dať logovať coefficients
-#features = get_artifact_json_from_mlflow(dbutils.widgets.get("model_uri"))
+#specify path for the feature names logged in your mlflow experiment
+features = mlflow.artifacts.load_text(f"dbfs:/databricks/mlflow-tracking/21eba1de169f4aabb0c709f2f34475ed/{run_id}/artifacts/features.txt")
 
 feature_store_features = [
     feature for feature in features if feature not in ["intercept", "intercept_vector"]
