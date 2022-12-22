@@ -3,9 +3,9 @@ SELECT
   c.customer_id,
   a.account_id
 FROM
-  odap_features.features_customer_latest AS c
+  odap_features_customer.features_customer_latest AS c
 INNER JOIN
-  odap_features.features_account AS a
+  odap_features_account.features_account_latest AS a
 ON
   c.customer_id == a.customer_id
 WHERE
