@@ -57,9 +57,11 @@ def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:
 # MAGIC %python
 # MAGIC metadata = {
 # MAGIC     "category": "web_visits",
+# MAGIC     "table": "product_features",
 # MAGIC     "features": {
 # MAGIC         "{product}_web_visits_count_in_last_{time_window}": {
 # MAGIC             "description": "Number of {product} web visits in last {time_window}",
+# MAGIC             "fillna_with": 0,
 # MAGIC         }
 # MAGIC     }
 # MAGIC }

@@ -1,10 +1,16 @@
 -- Databricks notebook source
+-- MAGIC %run ../init/target_store
+
+-- COMMAND ----------
+
+create widget text target default "";
 create widget text timestamp default ""
 
 -- COMMAND ----------
 
 -- MAGIC %python
 -- MAGIC metadata = {
+-- MAGIC     "table": "simple_features",
 -- MAGIC     "category": "personal",
 -- MAGIC     "features": {
 -- MAGIC         "customer_email": {
@@ -29,10 +35,10 @@ create widget text timestamp default ""
 
 select
   customer_id,
-  timestamp(getargument("timestamp")) as timestamp,
+  t.timestamp,
   customer_email
 from
-  hive_metastore.odap_offline_sdm_l2.customer
+  hive_metastore.odap_offline_sdm_l2.customer join target_store t using (customer_id)
 -- union (
 --   select
 --     123456789 as customer_id,

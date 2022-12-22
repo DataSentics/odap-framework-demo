@@ -9,7 +9,8 @@ from odap.feature_factory.widgets import create_notebooks_widget
 
 # MAGIC %sql
 # MAGIC create widget text target default "no target";
-# MAGIC create widget text timestamp default "2020-12-12"
+# MAGIC create widget text timestamp default "2020-12-12";
+# MAGIC create widget text timeshift default "0"
 
 # COMMAND ----------
 
@@ -28,3 +29,11 @@ create_notebooks_widget()
 from odap.feature_factory.orchestrate import orchestrate
 
 orchestrate()
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC delete from odap_features_customer_ng.simple_features;
+# MAGIC delete from odap_features_customer_ng.product_features;
+# MAGIC delete from odap_features_customer_ng.features_customer_latest;
+# MAGIC delete from odap_features_customer_ng.metadata_customer;

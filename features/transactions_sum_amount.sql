@@ -1,5 +1,5 @@
 -- Databricks notebook source
--- MAGIC %run ../init/target_store
+-- MAGIC %run ../init/target_store $timeshift=3
 
 -- COMMAND ----------
 
@@ -28,6 +28,7 @@ or replace temporary view card_transactions as (
 -- MAGIC %python
 -- MAGIC metadata = {
 -- MAGIC     "category": "transactions",
+-- MAGIC     "location": "product_features",
 -- MAGIC     "features": {
 -- MAGIC         "transactions_sum_amount_in_last_{time_window}": {
 -- MAGIC             "description": "Total volume of transactions in last {time_window}",
