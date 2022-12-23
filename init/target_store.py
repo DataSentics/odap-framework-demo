@@ -25,4 +25,9 @@ dbutils.widgets.text("target", "no target")
     .filter(f.col("target") == dbutils.widgets.get("target"))
 ).createOrReplaceTempView("target_store")
 
-print("Target store successfully initialized")
+print(f"Target store successfully initialized for target '{dbutils.widgets.get('target')}'")
+
+if dbutils.widgets.get("target") == "no target":
+    print(f"Timestamp '{dbutils.widgets.get('timestamp')}' used with timeshift of '{dbutils.widgets.get('timeshift')}' days")
+else:
+    print("Timestamp and timeshift widgets are being ignored")

@@ -35,8 +35,8 @@ def drop_feature_store(table: str):
 
 # COMMAND ----------
 
-drop_feature_store("odap_features.features_customer")
-drop_feature_store("odap_features.features_account")
+drop_feature_store("odap_features_customer.simple_features")
+drop_feature_store("odap_features_customer.product_features")
 
 # COMMAND ----------
 

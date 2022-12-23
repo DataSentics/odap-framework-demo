@@ -43,17 +43,6 @@ wdf = wdf_orig.join(target_store, on="customer_id").filter(f.col("visit_timestam
 
 # COMMAND ----------
 
-def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:    
-    return [
-        tw.sum_windowed(
-            f"{product}_web_visits_count_in_last_{time_window}",
-            f.lower("url").contains(product).cast("integer"),
-        )
-        for product in products
-    ]
-
-# COMMAND ----------
-
 # MAGIC %python
 # MAGIC metadata = {
 # MAGIC     "category": "web_visits",
@@ -68,4 +57,16 @@ def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:
 
 # COMMAND ----------
 
+def product_agg_features(time_window: str) -> List[tw.WindowedColumn]:    
+    return [
+        tw.sum_windowed(
+            f"{product}_web_visits_count_in_last_{time_window}",
+            f.lower("url").contains(product).cast("integer"),
+        )
+        for product in products
+    ]
+
+# COMMAND ----------
+
 df_final = wdf.time_windowed(group_keys=["customer_id", "timestamp"], agg_columns_function=product_agg_features)
+# df_final.display()
