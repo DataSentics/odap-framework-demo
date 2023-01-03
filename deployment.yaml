@@ -39,7 +39,7 @@ environments:
               notebook_path: "orchestration/features_orchestrator"
               base_parameters:
                 target: "no target"
-                timestamp: "{{start_date}}"
+                timestamp: "{% raw %}{{start_date}}{% endraw %}"
 
       - name: "upsell-uc-investment-interest-export"
         git_source: *odap-git-source
