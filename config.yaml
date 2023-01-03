@@ -1,12 +1,12 @@
 parameters:
   featurefactory:
+    database: "odap_features_{entity}"
     features:
-      database: "odap_features_{entity}"
-      latest_table: "odap_features_{entity}.features_{entity}_latest"
+      latest_table: "features_{entity}_latest"
       dir_path: "dbfs:/odap_features/{entity}/features"
 
     metadata:
-      table: "odap_features_{entity}.metadata"
+      table: "metadata"
       path: "dbfs:/odap_features/{entity}/metadata"
 
     entities:
@@ -37,6 +37,8 @@ parameters:
         attributes:
           customer:
             - "customer_email"
+          account:
+            - currency
 
       email_csv_dbfs_export:
         type: "csv_dbfs"
