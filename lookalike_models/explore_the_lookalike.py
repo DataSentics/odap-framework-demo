@@ -23,7 +23,6 @@ dbutils.widgets.text("entity_id_column_name", "customer_id")
 dbutils.widgets.text("entity_name", "customer")
 dbutils.widgets.text("latest_date", "2022-09-30")
 dbutils.widgets.text("model_uri", "runs:/1ffc9dd4c3834751b132c70df455a00d/pipeline")
-dbutils.widgets.dropdown("save_the_segment", "No", ["No", "Yes"])
 dbutils.widgets.text("segment_name", "customers_likely_to_churn")
 
 # COMMAND ----------
@@ -224,41 +223,3 @@ fig = px.histogram(df_visualization_scores.sample(sample_rate).toPandas(), x="pr
                          hover_data=["group"], histnorm='percent'
                          )
 fig.show()
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Save the lookalike segment
-# MAGIC Save useful documenting information and define the extended segment
-
-# COMMAND ----------
-
-# DBTITLE 1,Log important information to mlflow
-if (dbutils.widgets.get("save_the_segment") == "Yes"):
-    username = dbutils.notebook.entry_point.getDbutils().notebook().getContext().userName().get()
-    mlflow.set_experiment(f"/Users/{username}/lookalike_segments")
-
-    with mlflow.start_run():
-        mlflow.log_param("Segment to extend", dbutils.widgets.get("segment_name"))
-        mlflow.log_param("Entity ID column name", dbutils.widgets.get("entity_id_column_name"))
-        mlflow.log_param("Entity name", dbutils.widgets.get("entity_name"))
-        mlflow.log_param("Used model", dbutils.widgets.get("model_uri"))
-        mlflow.log_param("Criterion for segment definition", criterion_choice.value)
-        mlflow.log_param("Value set for lookalikes definition", slider.value)
-
-        mlflow.log_metric("Lookalike better than chance by", avg_score_lookalike_improvement)
-        mlflow.log_metric("Maximal possible improvement against chance", maximal_improvement)
-
-# COMMAND ----------
-
-# DBTITLE 1,Union with existing segment
-if dbutils.widgets.get("save_the_segment") == "Yes":
-    df_original_segment_final = (
-        spark.table("odap_digi_use_case_segments.segments")
-        .filter(f.col("segment") == dbutils.widgets.get("segment_name"))
-        .drop("export_id", "segment")
-    )
-
-    df_lookalikes_final = df_lookalikes.drop("probability_of_lookalike")
-
-    df_final = df_lookalikes_final.union(df_original_segment_final)
