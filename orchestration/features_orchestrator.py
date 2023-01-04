@@ -9,7 +9,8 @@ from odap.feature_factory.widgets import create_notebooks_widget
 
 # MAGIC %sql
 # MAGIC create widget text target default "no target";
-# MAGIC create widget text timestamp default "2020-12-12"
+# MAGIC create widget text timestamp default "2020-12-12";
+# MAGIC create widget text timeshift default "0"
 
 # COMMAND ----------
 

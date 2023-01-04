@@ -1,12 +1,13 @@
 parameters:
   featurefactory:
+    database: "odap_features_{entity}"
     features:
-      table: "odap_features.features_{entity}"
-      path: "dbfs:/odap_features/features_{entity}.delta"
+      latest_table: "features_{entity}_latest"
+      dir_path: "dbfs:/odap_features/{entity}/features"
 
     metadata:
-      table: "odap_features.metadata_{entity}"
-      path: "dbfs:/odap_features/metadata_{entity}.delta"
+      table: "metadata"
+      path: "dbfs:/odap_features/{entity}/metadata"
 
     entities:
       customer:

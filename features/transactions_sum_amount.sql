@@ -28,12 +28,28 @@ or replace temporary view card_transactions as (
 -- MAGIC %python
 -- MAGIC metadata = {
 -- MAGIC     "category": "transactions",
+-- MAGIC     "table": "product_features",
 -- MAGIC     "features": {
 -- MAGIC         "transactions_sum_amount_in_last_{time_window}": {
 -- MAGIC             "description": "Total volume of transactions in last {time_window}",
+-- MAGIC             "fillna_with": 0,
 -- MAGIC         }
 -- MAGIC     }
 -- MAGIC }
+
+-- COMMAND ----------
+
+-- MAGIC %python
+-- MAGIC dq_checks = [
+-- MAGIC     "missing_percent(transactions_sum_amount_in_last_30d) < 5%",
+-- MAGIC     {
+-- MAGIC         "avg(transactions_sum_amount_in_last_30d)": {
+-- MAGIC             "fail": "when < 5000",
+-- MAGIC         }
+-- MAGIC     },
+-- MAGIC     "missing_percent(transactions_sum_amount_in_last_60d) < 10%",
+-- MAGIC     "missing_percent(transactions_sum_amount_in_last_90d) < 15%",
+-- MAGIC ]
 
 -- COMMAND ----------
 
