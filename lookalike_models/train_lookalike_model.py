@@ -35,7 +35,7 @@ from pyspark.mllib.util import MLUtils
 from pyspark.sql.dataframe import DataFrame
 import pyspark.sql.functions as f
 import pyspark.sql.types as t
-from segments.lookalike_boosting.ml_functions import lift_curve_colname_specified, ith, process_multiple_segments_input, compute_lift_train_test, lift_curve, generate_dummy_data
+from lookalike_models.ml_functions import lift_curve_colname_specified, ith, process_multiple_segments_input, compute_lift_train_test, lift_curve, generate_dummy_data
 import shap
 
 # COMMAND ----------
@@ -52,8 +52,6 @@ def get_date_parts(date_string):
 # MAGIC %md ####Widgets
 
 # COMMAND ----------
-
-dbutils.widgets.removeAll()
 
 dbutils.widgets.dropdown("1. use_dummy_data", "No", ["Yes", "No"])
 dbutils.widgets.text("2. latest_date", "2022-09-30")
@@ -74,6 +72,7 @@ dbutils.widgets.text("9. model_name", "RandomForest")
 
 # COMMAND ----------
 
+# DBTITLE 1,Define key datasets
 if dbutils.widgets.get("1. use_dummy_data") == "Yes":
     df_model_dataset = generate_dummy_data()
 else:
@@ -121,28 +120,12 @@ if (dbutils.widgets.get("6. downsample") == "Yes"):
 
 # COMMAND ----------
 
-# MAGIC %md ## Features selection
-
-# COMMAND ----------
-
-# MAGIC %md Pozor na featury, z ktorých vznikol segment. 
-# MAGIC Netreba vyhadzovať  
-# MAGIC Rozlišovať na performance modelu a užitočnosť segmentu  
-# MAGIC Kalibrovať skóre na pravdepodobnosti
-
-# COMMAND ----------
-
-X = df_model_dataset.select("web_analytics_loan_visits_count_30d").drop("id_col", "timestamp", "label").toPandas()
-y = df_model_dataset.select("label").toPandas()
-
-# COMMAND ----------
-
-features_names = ["web_analytics_traffic_medium_most_common_90d", "web_analytics_loan_visits_count_30d", "web_analytics_time_on_site_avg_90d"]
-#[feature for feature in df_model_dataset.columns if feature not in [dbutils.widgets.get("4. entity_id_column_name"), "timestamp"]]
-
-# COMMAND ----------
-
 # MAGIC %md ## Features preprocessing - split, scale, normalize
+
+# COMMAND ----------
+
+# DBTITLE 1,The list of features
+features_names = [feature for feature in df_model_dataset.columns if feature not in [dbutils.widgets.get("4. entity_id_column_name"), "timestamp"]]
 
 # COMMAND ----------
 
@@ -154,27 +137,26 @@ df_train, df_test = df_model_dataset.randomSplit([0.8, 0.2], seed=42)
 # DBTITLE 1,Specifying column types
 # define which columns we consider as categorical/numerical
 skip_cols = [dbutils.widgets.get("4. entity_id_column_name"), "timestamp", "label"]
-cat_cols = ["web_analytics_traffic_medium_most_common_90d"]#[f.name for f in df_model_dataset.schema.fields if isinstance(f.dataType, t.StringType) and f.name not in skip_cols]
-num_cols = ["web_analytics_loan_visits_count_30d", "web_analytics_time_on_site_avg_90d"]#[f.name for f in df_model_dataset.schema.fields if isinstance(f.dataType, (t.IntegerType, t.DoubleType, t.FloatType, t.DecimalType, t.LongType)) and f.name not in skip_cols]
+cat_cols = [f.name for f in df_model_dataset.schema.fields if isinstance(f.dataType, t.StringType) and f.name not in skip_cols]
+num_cols = [f.name for f in df_model_dataset.schema.fields if isinstance(f.dataType, (t.IntegerType, t.DoubleType, t.FloatType, t.DecimalType, t.LongType)) and f.name not in skip_cols]
 
 # COMMAND ----------
 
 # DBTITLE 1,String Indexer, OneHotEncoder, Assembler
 stages = [] # stages in our Pipeline
 for categoricalCol in cat_cols:
-  
-  ### StringIndexer could be applied only on string columns -> ensure this
-  df_train = df_train.withColumn(categoricalCol, f.col(categoricalCol).cast('string'))
-  df_test = df_test.withColumn(categoricalCol, f.col(categoricalCol).cast('string'))
-    
-  ### Category Indexing with StringIndexer
-  stringIndexer = StringIndexer(inputCol=categoricalCol, outputCol=categoricalCol+"Index", handleInvalid="skip") # skip, error
-    
-  ### Use OneHotEncoder to convert categorical variables into binary SparseVectors
-  encoder = OneHotEncoder(inputCol=categoricalCol+"Index", outputCol=categoricalCol+"_classVec")
-    
-  ### Add stages.  These are not run here, but will be run all at once later on.
-  stages += [stringIndexer, encoder]
+    ### StringIndexer could be applied only on string columns -> ensure this
+    df_train = df_train.withColumn(categoricalCol, f.col(categoricalCol).cast('string'))
+    df_test = df_test.withColumn(categoricalCol, f.col(categoricalCol).cast('string'))
+
+    ### Category Indexing with StringIndexer
+    stringIndexer = StringIndexer(inputCol=categoricalCol, outputCol=categoricalCol+"Index", handleInvalid="skip") # skip, error
+
+    ### Use OneHotEncoder to convert categorical variables into binary SparseVectors
+    encoder = OneHotEncoder(inputCol=categoricalCol+"Index", outputCol=categoricalCol+"_classVec")
+
+    ### Add stages.  These are not run here, but will be run all at once later on.
+    stages += [stringIndexer, encoder]
 
 ### vectorAssembler  
 assemblerInputs = num_cols + [c + "_classVec" for c in cat_cols]
@@ -212,6 +194,14 @@ if dbutils.widgets.get("8. normalize") != "NO NORMALIZER":
 
 else:
     scaler = None    
+
+# COMMAND ----------
+
+# DBTITLE 1,Feature selection
+selector = ChiSqSelector(numTopFeatures=12, featuresCol="features",
+                        outputCol="selectedFeatures", labelCol="label")
+
+stages = stages + [selector]
 
 # COMMAND ----------
 
@@ -267,12 +257,7 @@ CLASSIFIERS = {
 
 # COMMAND ----------
 
-model_name = dbutils.widgets.get("10. model_name")
-
-# COMMAND ----------
-
-# only for overview for now
-fitted_pipeline.transform(df_test).select("id_col", "label", "prediction", "rawPrediction", "probability").display()
+model_name = dbutils.widgets.get("9. model_name")
 
 # COMMAND ----------
 
@@ -290,7 +275,7 @@ with mlflow.start_run():
     mlflow.log_artifact('/tmp/features.txt')
 
     # choose classifier
-    classifier = CLASSIFIERS[model_name].setFeaturesCol("features").setLabelCol("label")
+    classifier = CLASSIFIERS[model_name].setFeaturesCol("selectedFeatures").setLabelCol("label")
 
     # add chosen classifier to stages of the pipeline
     spark_pipeline = Pipeline(stages=stages + [classifier])
