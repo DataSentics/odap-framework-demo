@@ -3,7 +3,7 @@ SELECT
   c.customer_id,
   a.account_id
 FROM
-  odap_features_customer.features_customer_latest AS c
+  ${env:READ_ENV}_odap_features_customer.features_latest AS c
 INNER JOIN
   odap_features_account.features_account_latest AS a
 ON
