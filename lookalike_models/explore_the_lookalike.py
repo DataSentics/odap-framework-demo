@@ -186,6 +186,9 @@ print("Maximal possible difference is " + str(maximal_improvement) + " times hig
 
 # MAGIC %md
 # MAGIC ## Visualize scores
+# MAGIC At the end of the section is a chart with scores depicted for each group of the model dataset.   
+# MAGIC These groups consist of lookalikes, original segment and other observations not marked as a lookalike.  
+# MAGIC You can compare scores for these groups to assess whether chosen lookalikes have similar scores to original segment (representing targets) and whether not chosen observations have lower scores than original segment.
 
 # COMMAND ----------
 
