@@ -257,6 +257,7 @@ CLASSIFIERS = {
 
 # COMMAND ----------
 
+# Assign the model type from the widget
 model_name = dbutils.widgets.get("9. model_name")
 
 # COMMAND ----------
